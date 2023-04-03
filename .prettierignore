@@ -1,0 +1,13 @@
+# Ignore modules:
+node_modules
+
+# Ignore test coverage:
+client/coverage
+server/coverage
+tools/**/*/coverage
+
+# Ignore artifacts:
+client/dist
+server/dist
+tools/**/*/dist
+

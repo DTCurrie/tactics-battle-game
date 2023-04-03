@@ -1,0 +1,30 @@
+{
+  "name": "@tactics-battle-game/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/api.umd.cjs",
+  "module": "./dist/api.js",
+  "types": "./dist/main.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/api.js",
+      "require": "./dist/api.umd.cjs"
+    }
+  },
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "peerDependencies": {
+    "three": "^0.151.2"
+  },
+  "devDependencies": {
+    "@types/three": "^0.150.0",
+    "three": "^0.151.2",
+    "typescript": "^4.9.3",
+    "vite": "^4.2.0",
+    "vite-plugin-dts": "^2.1.0"
+  }
+}
