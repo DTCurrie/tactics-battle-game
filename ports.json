@@ -1,5 +1,5 @@
 {
-  "client": 8080,
+  "game": 8080,
   "levelCreator": 8081,
   "server": 3000
 }

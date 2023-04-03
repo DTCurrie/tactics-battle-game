@@ -8,8 +8,19 @@ export type LevelData = {
   tileData: Vector3Tuple[];
 } & Metadata;
 
-export const getLevel = async (id: string) => {
+export type Level = Pick<LevelData, "id" | "name" | "tileData">;
+
+export const getLevel = async (id: string): Promise<LevelData> => {
   const resp = await apiRequest(apiUrl(`/levels/${id}`), {
+    method: "GET",
+  });
+
+  const json = await resp.json();
+  return json;
+};
+
+export const listLevels = async (): Promise<LevelData[]> => {
+  const resp = await apiRequest(apiUrl("/levels"), {
     method: "GET",
   });
 

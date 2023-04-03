@@ -18,7 +18,7 @@ describe("logger", () => {
     console.error = original.error;
   });
 
-  test("logger.log()", () => {
+  test(".log()", () => {
     const { log } = logger("test");
     const spy = vi.spyOn(console, "log");
 
@@ -27,7 +27,7 @@ describe("logger", () => {
     expect(spy).toHaveBeenCalledWith("[test]: test message", { isTest: true });
   });
 
-  test("logger.logInfo()", () => {
+  test(".logInfo()", () => {
     const { logInfo } = logger("test");
     const spy = vi.spyOn(console, "info");
 
@@ -36,7 +36,7 @@ describe("logger", () => {
     expect(spy).toHaveBeenCalledWith("[test]: test message", { isTest: true });
   });
 
-  test("logger.logWarning()", () => {
+  test(".logWarning()", () => {
     const { logWarning } = logger("test");
     const spy = vi.spyOn(console, "warn");
 
@@ -45,7 +45,7 @@ describe("logger", () => {
     expect(spy).toHaveBeenCalledWith("[test]: test message", { isTest: true });
   });
 
-  test("logger.logError()", () => {
+  test(".logError()", () => {
     const { logError } = logger("test");
     const spy = vi.spyOn(console, "error");
 

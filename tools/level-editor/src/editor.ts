@@ -1,14 +1,7 @@
+import { Color, Group, Vector2Tuple, Vector3Tuple } from "three";
 import {
-  BoxGeometry,
-  Color,
-  Mesh,
-  MeshBasicMaterial,
-  Vector2Tuple,
-  Vector3Tuple,
-} from "three";
-import {
-  LevelData,
   Tile,
+  createBoard,
   createTile,
   SETTINGS,
 } from "@tactics-battle-game/api";
@@ -24,45 +17,33 @@ type Rect = {
 const { scene, camera } = three();
 
 export type LevelEditor = {
-  levelData: Pick<LevelData, "name" | "tileData">;
-  grid: (Tile | undefined)[][];
-  currentCoordinates: Vector2Tuple;
+  board: Group;
   adjustCurrent: (height: number) => void;
   adjustRect: (rect: Rect, height: number) => void;
   adjustRandom: (height: number) => void;
   clearGrid: () => void;
-  updateSelector: ([x, y]: Vector2Tuple) => void;
+  setSelector: ([x, y]: Vector2Tuple) => void;
   getTileData: () => Vector3Tuple[];
 };
 
 const createLevelEditor = (): LevelEditor => {
-  const levelData: Pick<LevelData, "name" | "tileData"> = {
+  const { group, grid, getTile, setTile, updateSelector } = createBoard({
+    id: "",
     name: "",
     tileData: [],
-  };
-
-  const grid: (Tile | undefined)[][] = Array.from(
-    { length: SETTINGS.board.width },
-    () => Array.from({ length: SETTINGS.board.depth })
-  );
+  });
 
   let currentCoordinates: Vector2Tuple = [0, 0];
 
-  const selector = new Mesh(
-    new BoxGeometry(1, 0.1, 1),
-    new MeshBasicMaterial({ color: "yellow", opacity: 0.5, transparent: true })
-  );
-
   const getOrCreateTile = ([x, y]: Vector2Tuple): Tile => {
-    if (grid[x][y]) {
-      return grid[x][y] as Tile;
+    if (getTile([x, y])) {
+      return getTile([x, y]) as Tile;
     }
 
     const tile = createTile({});
-    tile.place([x, y]);
-    scene.add(tile.mesh);
-    grid[x] ??= [];
-    grid[x][y] = tile;
+    tile.setPosition([x, y]);
+    group.add(tile.mesh);
+    setTile([x, y], tile);
     return tile;
   };
 
@@ -91,26 +72,26 @@ const createLevelEditor = (): LevelEditor => {
         }
 
         tile.setHeight(height);
-        grid[x][y] = tile;
+        setTile([x, y], tile);
       }
 
       return;
     }
 
-    if (!grid[x][y]) {
+    if (!getTile([x, y])) {
       return;
     }
 
-    const tile = grid[x][y] as Tile;
+    const tile = getTile([x, y]) as Tile;
     tile.setHeight(height);
 
     if (tile.height() <= 0) {
-      grid[x][y] = undefined;
-      scene.remove(tile.mesh);
+      setTile([x, y], undefined);
+      group.remove(tile.mesh);
       return;
     }
 
-    grid[x][y] = tile;
+    setTile([x, y], tile);
   };
 
   const adjustCurrent = (height: number) =>
@@ -129,28 +110,25 @@ const createLevelEditor = (): LevelEditor => {
   const adjustRandom = (height: number) => adjustRect(randomRect(), height);
 
   const clearGrid = () => {
-    for (const cols of grid) {
+    for (const cols of grid()) {
       for (const tile of cols) {
         if (tile) {
           scene.remove(tile.mesh);
-          grid[tile.mesh.position.x][tile.mesh.position.z] = undefined;
+          grid()[tile.mesh.position.x][tile.mesh.position.z] = undefined;
         }
       }
     }
   };
 
-  const updateSelector = ([x, y]: Vector2Tuple) => {
+  const setSelector = ([x, y]: Vector2Tuple) => {
     currentCoordinates = [x, y];
-    const tile = grid[x][y];
-    tile
-      ? selector.position.set(...tile.top())
-      : selector.position.set(currentCoordinates[0], 0, currentCoordinates[1]);
+    updateSelector([x, y]);
   };
 
   const getTileData = (): Vector3Tuple[] => {
     const tiles: Vector3Tuple[] = [];
 
-    for (const col of grid) {
+    for (const col of grid()) {
       for (const tile of col) {
         if (tile) {
           tiles.push([
@@ -166,21 +144,20 @@ const createLevelEditor = (): LevelEditor => {
   };
 
   scene.background = new Color(0xffffff);
-  scene.add(selector);
+  scene.add(group);
 
   camera.position.y = SETTINGS.board.width / 2;
   camera.position.y = 10;
   camera.position.z = 10;
+  camera.lookAt(group.position);
 
   return {
-    levelData,
-    grid,
-    currentCoordinates,
+    board: group,
     adjustCurrent,
     adjustRect,
     adjustRandom,
     clearGrid,
-    updateSelector,
+    setSelector,
     getTileData,
   };
 };

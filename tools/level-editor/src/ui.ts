@@ -1,4 +1,5 @@
 import { Vector2, WebGLRenderer } from "three";
+import { nanoid } from "nanoid";
 import { LevelEditor } from "./editor";
 import { SETTINGS, createLevel } from "@tactics-battle-game/api";
 
@@ -64,10 +65,7 @@ export const createLevelEditorUi = (
     }),
     button("Save Level", () =>
       createLevel({
-        name: `Test ${Array.from(
-          crypto.getRandomValues(new Uint8Array(10)),
-          (dec) => dec.toString(16).padStart(2, "0")
-        ).join("")}`,
+        name: `Test ${nanoid(10)}`,
         tileData: levelEditor.getTileData(),
       })
     ),

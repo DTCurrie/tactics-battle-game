@@ -2,8 +2,8 @@ import { expect, test, vi, describe } from "vitest";
 import { messenger } from "./messenger";
 
 describe("messenger", () => {
-  test("messenger.addObserver()", () => {
-    const { addObserver, removeObserver, postMessage } = messenger();
+  test(".addObserver()", () => {
+    const { addObserver, removeObserver, message } = messenger();
 
     const target = {
       toSpy: () => ({}),
@@ -13,15 +13,15 @@ describe("messenger", () => {
     const handler = () => target.toSpy();
 
     addObserver("test", handler);
-    postMessage("test");
+    message("test");
 
     expect(spy).toHaveBeenCalled();
 
     removeObserver("test", handler);
   });
 
-  test("messenger.removeObserver()", () => {
-    const { addObserver, removeObserver, postMessage } = messenger();
+  test(".removeObserver()", () => {
+    const { addObserver, removeObserver, message } = messenger();
 
     const target = {
       toSpy: () => ({}),
@@ -31,41 +31,41 @@ describe("messenger", () => {
     const handler = () => target.toSpy();
 
     addObserver("test", handler);
-    postMessage("test");
+    message("test");
 
     expect(spy).toHaveBeenCalledTimes(1);
 
     removeObserver("test", handler);
-    postMessage("test");
+    message("test");
 
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  test("messenger.clean()", () => {
+  test(".clean()", () => {
     const sender = "test-sender";
-    const { tables, addObserver, removeObserver, clean } = messenger();
+    const { table, addObserver, removeObserver, clean } = messenger();
 
     const handler = () => ({});
 
     addObserver("test-a", handler, sender);
     addObserver("test-b", handler, sender);
 
-    expect(tables["test-a"][sender].length).toEqual(1);
-    expect(tables["test-b"][sender].length).toEqual(1);
+    expect(table()["test-a"][sender].length).toEqual(1);
+    expect(table()["test-b"][sender].length).toEqual(1);
 
     removeObserver("test-a", handler, sender);
 
-    expect(tables["test-a"][sender].length).toEqual(0);
-    expect(tables["test-b"][sender].length).toEqual(1);
+    expect(table()["test-a"][sender].length).toEqual(0);
+    expect(table()["test-b"][sender].length).toEqual(1);
 
     clean();
 
-    expect(tables["test-a"]).toBeUndefined();
-    expect(tables["test-b"][sender].length).toEqual(1);
+    expect(table()["test-a"]).toBeUndefined();
+    expect(table()["test-b"][sender].length).toEqual(1);
   });
 
   test("performance", () => {
-    const { addObserver, removeObserver, postMessage, clean } = messenger();
+    const { addObserver, removeObserver, message, clean } = messenger();
     const testMessage = "test";
     const clearMessage = "clear";
     const start = "start";
@@ -74,7 +74,7 @@ describe("messenger", () => {
     const testListener = () => {
       const sender = (Math.random() + 1).toString(36).substring(7);
 
-      const onTest = () => postMessage(clearMessage, sender);
+      const onTest = () => message(clearMessage, sender, { isTest: true });
       const onClear = () => removeObserver(testMessage, onTest);
 
       const addObservers = () => {
@@ -101,9 +101,12 @@ describe("messenger", () => {
       const listener = testListener();
       listener.addObservers();
       listeners.push(listener);
+      message(testMessage, listener.sender, {
+        some: "thing",
+        count: 1234,
+        map: { first: "first", second: "second" },
+      });
     }
-
-    postMessage(testMessage);
 
     for (const listener of listeners) {
       listener.removeObservers();
@@ -117,11 +120,6 @@ describe("messenger", () => {
       "measure start to finish",
       start,
       finish
-    );
-
-    console.log(
-      "messenger performance",
-      performance.getEntriesByType("measure")
     );
 
     expect(measure.duration).toBeLessThan(100);

@@ -59,9 +59,9 @@ This will generate the build artifacts and place them in the `dist` directory. _
 This project is a monorepo built on `pnpm` [workspaces](https://pnpm.io/workspaces). The following is a breakdown of the application architecture:
 
 - `.vscode`: VSCode IDE configuration
-- `client`: The rendering and game logic
+- `game`: The rendering and game logic
 - `server`: The application logic
 - `tools`: A collection of tools and shared code
-  - `api`: API definitions for `client <-> server` communication
+  - `api`: API definitions for shared `game` logic and  `game <-> server` communication
   - `level-editor`: A tool for creating battle maps
   - `three-utils`: Common utilities for `three`
