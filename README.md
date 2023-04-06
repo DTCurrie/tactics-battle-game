@@ -65,3 +65,4 @@ This project is a monorepo built on `pnpm` [workspaces](https://pnpm.io/workspac
   - `api`: API definitions for shared `game` logic and  `game <-> server` communication
   - `level-editor`: A tool for creating battle maps
   - `three-utils`: Common utilities for `three`
+  - `ui`: UI elements

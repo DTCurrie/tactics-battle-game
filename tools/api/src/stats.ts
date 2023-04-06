@@ -1,4 +1,6 @@
 export type Stats = {
   ctr: number;
-  spd: number;
+  speed: number;
+  move: number;
+  jump: number;
 };

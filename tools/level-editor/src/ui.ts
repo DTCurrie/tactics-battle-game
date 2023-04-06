@@ -1,34 +1,8 @@
 import { Vector2, WebGLRenderer } from "three";
 import { nanoid } from "nanoid";
-import { LevelEditor } from "./editor";
 import { SETTINGS, createLevel } from "@tactics-battle-game/api";
-
-const button = (label: string, handler: (e: Event) => void) => {
-  const btn = document.createElement("button");
-
-  btn.textContent = label;
-  btn.addEventListener("click", (e) => {
-    e.preventDefault();
-    handler(e);
-  });
-
-  return btn;
-};
-
-const buttons = (btns: HTMLButtonElement[]) => {
-  const btnContainer = document.createElement("div");
-
-  btnContainer.style.position = "absolute";
-  btnContainer.style.left = "4px";
-  btnContainer.style.top = "4px";
-  btnContainer.style.display = "flex";
-  btnContainer.style.flexDirection = "column";
-  btnContainer.style.gap = "2px";
-  btnContainer.style.zIndex = "100";
-  btnContainer.append(...btns);
-
-  return btnContainer;
-};
+import { button, buttons } from "@tactics-battle-game/ui";
+import { LevelEditor } from "./editor";
 
 export const createLevelEditorUi = (
   renderer: WebGLRenderer,

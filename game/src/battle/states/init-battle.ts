@@ -1,19 +1,16 @@
 import { CapsuleGeometry, Color, Mesh, MeshToonMaterial } from "three";
-import {} from "@tactics-battle-game/api/src/unit";
 import {
   Board,
   LevelData,
   SETTINGS,
-  Unit,
   createBoard,
-  createUnit,
   listLevels,
-  startAsyncCoroutine,
 } from "@tactics-battle-game/api";
 import { BattleState, battleStateMachine } from "../state";
 import { createTurnData, createTurnOrder } from "../turn-order";
 import { createSelectUnitState } from "./select-unit";
 import { three } from "@tactics-battle-game/three-utils";
+import { Unit, createUnit } from "../unit";
 
 const jobColor = (job: "rogue" | "warrior" | "wizard") => {
   switch (job) {
@@ -41,9 +38,9 @@ export const createInitBattleState = (): BattleState => {
   let level: LevelData;
   let board: Board;
 
-  async function* spawnUnits() {
+  const spawnUnits = async () => {
     const levels = await listLevels();
-    level = levels[0];
+    level = levels.sort(() => 0.5 - Math.random())[0];
     board = createBoard(level);
 
     for (const job of jobs) {
@@ -57,17 +54,23 @@ export const createInitBattleState = (): BattleState => {
       const unit = createUnit({
         name: job,
         mesh,
-        stats: { spd: Math.floor(Math.random() * 3 + 1) },
+        stats: {
+          speed: Math.floor(Math.random() * (110 - 90) + 90),
+          move: 5,
+          jump: 3,
+        },
       });
 
       for (const [x, y, z] of level.tileData) {
         const tile = board.getTile([x, z]);
         if (y > 0 && tile && !tile.content()) {
+          unit.setPosition(tile.top());
           unit.setTile(tile);
           break;
         }
       }
 
+      board.group.add(unit.mesh);
       units.push(unit);
     }
 
@@ -80,14 +83,12 @@ export const createInitBattleState = (): BattleState => {
     camera.position.z = 10;
     camera.lookAt(board.group.position);
 
-    yield null;
-
     battleStateMachine().transition(createSelectUnitState());
-  }
+  };
 
   return {
     onEnter: (context) => {
-      startAsyncCoroutine(spawnUnits());
+      spawnUnits();
       return context;
     },
     onExit: () => ({
@@ -95,8 +96,7 @@ export const createInitBattleState = (): BattleState => {
       board,
       currentCoordinates: [0, 0],
       turn: {
-        data: data,
-        order: order,
+        ...data,
         round: order.round(units, data),
       },
     }),

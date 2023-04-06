@@ -15,5 +15,5 @@
     "noImplicitReturns": true,
     "skipLibCheck": true
   },
-  "include": ["src", "../tools/api/src/unit.ts"]
+  "include": ["src", "src/battle/unit.ts", "../tools/api/src/entity.ts"]
 }

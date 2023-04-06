@@ -1,5 +1,6 @@
 import {
   ACESFilmicToneMapping,
+  Clock,
   ColorManagement,
   OrthographicCamera,
   PCFSoftShadowMap,
@@ -19,6 +20,7 @@ type ThreeInstance = {
   setCamera: (next: OrthographicCamera) => void;
   play: () => void;
   pause: () => void;
+  deltaTime: () => number;
 };
 
 const createThreeManager = (): ThreeInstance => {
@@ -28,9 +30,12 @@ const createThreeManager = (): ThreeInstance => {
   });
 
   const scene = new Scene();
+  const clock = new Clock();
   let camera = new OrthographicCamera();
+  let deltaTime = 0;
 
   const loop = () => {
+    deltaTime = clock.getDelta();
     resizeToDisplay(camera, renderer);
     updatesSystem().update();
     renderer.render(scene, camera);
@@ -43,10 +48,12 @@ const createThreeManager = (): ThreeInstance => {
 
   const play = () => {
     renderer.setAnimationLoop(loop);
+    clock.start();
   };
 
   const pause = () => {
     renderer.setAnimationLoop(null);
+    clock.stop();
   };
 
   renderer.useLegacyLights = false;
@@ -65,6 +72,7 @@ const createThreeManager = (): ThreeInstance => {
     setCamera,
     play,
     pause,
+    deltaTime: () => deltaTime,
   };
 };
 

@@ -6,15 +6,16 @@ export const logger = (source: string) => {
   const emit = (
     type: LogType,
     message: string,
-    data?: unknown,
+    data: unknown = {},
     once?: boolean
   ) => {
     if (once) {
-      if (onceSet.has(message)) {
+      const key = `${message}|${JSON.stringify(data)}`;
+      if (onceSet.has(key)) {
         return;
       }
 
-      onceSet.add(message);
+      onceSet.add(key);
     }
 
     console[type](`[${source}]: ${message}`, data);

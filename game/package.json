@@ -11,6 +11,8 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@tactics-battle-game/ui": "workspace:^",
+    "@tweenjs/tween.js": "^19.0.0",
     "nanoid": "^3.3.6",
     "three": "^0.151.2"
   },

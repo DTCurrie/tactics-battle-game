@@ -31,7 +31,7 @@ const createMessenger = () => {
   const table: ObserversTable = {};
   const invoking = new Set<Listener[]>();
 
-  const { logError, logWarning } = logger("messenger");
+  const { logError, logInfo, logWarning } = logger("messenger");
 
   const addObserver = (
     messageType: MessageType,
@@ -57,6 +57,10 @@ const createMessenger = () => {
       }
 
       observers[sender] = [...observer, handler];
+      logInfo("New observer added", {
+        messageType,
+        sender,
+      });
     }
   };
 
@@ -90,6 +94,10 @@ const createMessenger = () => {
     if (index >= 0) {
       observer.splice(index, 1);
       observers[sender] = [...observer];
+      logInfo("Observer removed", {
+        messageType,
+        sender,
+      });
     }
   };
 
@@ -109,11 +117,15 @@ const createMessenger = () => {
     }
 
     if (!table[messageType]) {
-      logWarning("Message type is not being observed", {
-        messageType,
-        sender,
-        data,
-      });
+      logWarning(
+        "Message type is not being observed",
+        {
+          messageType,
+          sender,
+          data,
+        },
+        true
+      );
 
       return;
     }

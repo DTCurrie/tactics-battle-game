@@ -22,6 +22,12 @@ importers:
 
   game:
     dependencies:
+      '@tactics-battle-game/ui':
+        specifier: workspace:^
+        version: link:../tools/ui
+      '@tweenjs/tween.js':
+        specifier: ^19.0.0
+        version: 19.0.0
       nanoid:
         specifier: ^3.3.6
         version: 3.3.6
@@ -100,6 +106,9 @@ importers:
 
   tools/level-editor:
     dependencies:
+      '@tactics-battle-game/ui':
+        specifier: workspace:^
+        version: link:../ui
       nanoid:
         specifier: ^3.3.6
         version: 3.3.6
@@ -124,6 +133,31 @@ importers:
         version: 4.2.0(@types/node@18.11.18)
 
   tools/three-utils:
+    devDependencies:
+      '@tweenjs/tween.js':
+        specifier: ^19.0.0
+        version: 19.0.0
+      '@types/three':
+        specifier: ^0.150.0
+        version: 0.150.0
+      three:
+        specifier: ^0.151.2
+        version: 0.151.2
+      typescript:
+        specifier: ^4.9.3
+        version: 4.9.3
+      vite:
+        specifier: ^4.2.0
+        version: 4.2.0(@types/node@18.11.18)
+      vite-plugin-dts:
+        specifier: ^2.1.0
+        version: 2.1.0(vite@4.2.0)
+
+  tools/ui:
+    dependencies:
+      nanoid:
+        specifier: ^3.3.6
+        version: 3.3.6
     devDependencies:
       '@types/three':
         specifier: ^0.150.0
@@ -589,6 +623,9 @@ packages:
   /@tsconfig/node16@1.0.3:
     resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
     dev: true
+
+  /@tweenjs/tween.js@19.0.0:
+    resolution: {integrity: sha512-QVbvSlnP7FcjKr1edg460BbUlpdGzmIOfvpsvHCj3JPIVZ9S9KeQLk9mB24VlDzPIl/a/ehAZPE95xFsmqm+pQ==}
 
   /@types/argparse@1.0.38:
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}

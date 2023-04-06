@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
 import { messenger } from "../lib/messenger";
-import { Direction, Tile, Unit } from "@tactics-battle-game/api";
+import { Direction, Tile } from "@tactics-battle-game/api";
+import { Unit } from "./unit";
 
 const { message } = messenger();
 
@@ -79,8 +80,9 @@ export const createTurnData = (): TurnData => {
 
   const undoMove = () => {
     setMoved(false);
-    actor.setTile(startTile);
+    actor.setPosition(startTile.top());
     actor.setDirection(startDirection);
+    startTile.setContent(actor);
   };
 
   return {
@@ -124,7 +126,7 @@ export type TurnOrder = {
 };
 
 export const createTurnOrder = () => {
-  const id = `turn-order-${nanoid()}`;
+  const id = `turn-order [${nanoid()}]`;
 
   const canTakeTurn = (unit: Unit) => {
     const flag = createFlag(unit.stats().ctr >= activationCost);
@@ -136,7 +138,7 @@ export const createTurnOrder = () => {
     while (true) {
       message(beforeRound, id);
       for (const unit of units) {
-        const { ctr, spd } = unit.stats();
+        const { ctr: ctr, speed: spd } = unit.stats();
         unit.setStats({ ctr: ctr + spd });
       }
 

@@ -15,5 +15,5 @@
     "noImplicitReturns": true,
     "skipLibCheck": true
   },
-  "include": ["src", "../../game/src/battle/unit.ts"]
+  "include": ["src"]
 }

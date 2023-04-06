@@ -1,4 +1,4 @@
-import { Vector2Tuple, Vector3Tuple } from "three";
+import { Euler, Vector2Tuple, Vector3Tuple } from "three";
 
 export enum Direction {
   North,
@@ -7,11 +7,21 @@ export enum Direction {
   West,
 }
 
-export const toEuler = (direction: Direction): Vector3Tuple => [
+export const directions = [
+  Direction.North,
+  Direction.East,
+  Direction.South,
+  Direction.West,
+] as const;
+
+export const toVector3 = (direction: Direction): Vector3Tuple => [
   0,
   direction * 90,
   0,
 ];
+
+export const toEuler = (direction: Direction): Euler =>
+  new Euler(0, direction * 90, 0);
 
 export const getDirection = (coordinates: Vector2Tuple): Direction => {
   if (coordinates[1] > 0) return Direction.North;
@@ -33,12 +43,19 @@ export const getHeading = (
 export const getNormal = (direction: Direction): Vector2Tuple => {
   switch (direction) {
     case Direction.North:
-      return [0, 1];
+      return [0, -1];
     case Direction.East:
       return [1, 0];
     case Direction.South:
-      return [0, -1];
+      return [0, 1];
     default:
       return [-1, 0];
   }
 };
+
+export const normalizedDirections = [
+  getNormal(Direction.North),
+  getNormal(Direction.East),
+  getNormal(Direction.South),
+  getNormal(Direction.West),
+] as const;

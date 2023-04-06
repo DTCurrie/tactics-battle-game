@@ -50,7 +50,7 @@ export const createBoard = (initialLevel: Level): Board => {
   const updateSelector = ([x, y]: Vector2Tuple) => {
     const tile = getTile([x, y]);
     tile
-      ? selector.position.set(...tile.top()).add(new Vector3(0, 0.05, 0))
+      ? selector.position.copy(tile.top()).add(new Vector3(0, 0.05, 0))
       : selector.position.set(x, 0.05, y);
   };
 

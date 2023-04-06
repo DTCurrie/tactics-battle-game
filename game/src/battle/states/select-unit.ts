@@ -1,19 +1,16 @@
-import { startCoroutine } from "@tactics-battle-game/api";
-import { BattleContext, BattleState } from "../state";
+import { BattleContext, BattleState, battleStateMachine } from "../state";
+import { createCommandSelectionState } from "./command-selection";
 
 export const createSelectUnitState = (): BattleState => {
-  function* changeCurrentUnit(context: BattleContext) {
+  function changeCurrentUnit(context: BattleContext) {
     context.turn.round?.next();
-    context.board.updateSelector(context.turn.data.actor().tile().position());
-    yield null;
-    console.log("to select command!", {
-      actor: context.turn.data.actor().name(),
-    });
+    context.board.updateSelector(context.turn.actor().tile().position());
+    battleStateMachine().transition(createCommandSelectionState());
   }
 
   return {
     onEnter: (context) => {
-      startCoroutine(changeCurrentUnit(context));
+      changeCurrentUnit(context);
       return { ...context };
     },
   };

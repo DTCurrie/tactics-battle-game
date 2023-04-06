@@ -1,8 +1,6 @@
-export type UpdateHandler = (time: number, delta: number) => void;
+export type UpdateHandler = () => void;
 
 type UpdatesSytem = {
-  time: number;
-  delta: number;
   addUpdate: (handler: UpdateHandler) => number;
   addPostUpdate: (handler: UpdateHandler) => number;
   removeUpdate: (callback: UpdateHandler) => void;
@@ -14,10 +12,6 @@ type UpdatesSytem = {
 export const createUpdatesSystem = (): UpdatesSytem => {
   const updateHandlers: UpdateHandler[] = [];
   const postUpdateHandlers: UpdateHandler[] = [];
-
-  let time = performance.now();
-  let then = performance.now();
-  let delta = 0;
 
   const addUpdate = (handler: UpdateHandler) => updateHandlers.push(handler);
   const addPostUpdate = (handler: UpdateHandler) =>
@@ -32,24 +26,18 @@ export const createUpdatesSystem = (): UpdatesSytem => {
   };
 
   const update = () => {
-    time = performance.now();
-    delta = time - then;
-    then = time;
-
     for (const handler of updateHandlers) {
-      handler(time, delta);
+      handler();
     }
   };
 
   const postUpdate = () => {
     for (const handler of postUpdateHandlers) {
-      handler(time, delta);
+      handler();
     }
   };
 
   return {
-    time,
-    delta,
     addUpdate,
     addPostUpdate,
     removeUpdate,
