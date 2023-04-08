@@ -79,10 +79,12 @@ export const createTurnData = (): TurnData => {
   const setTargets = (next: Tile[]) => (targets = next);
 
   const undoMove = () => {
-    setMoved(false);
     actor.setPosition(startTile.top());
     actor.setDirection(startDirection);
+    actor.tile().setContent();
+    actor.setTile(startTile);
     startTile.setContent(actor);
+    setMoved(false);
   };
 
   return {

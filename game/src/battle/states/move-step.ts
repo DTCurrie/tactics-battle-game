@@ -27,6 +27,7 @@ export const createMoveStepState = (
       context.turn.actor().tile().setContent();
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       context.turn.actor().setTile(targets[cursor].tile!);
+      context.turn.setMoved(true);
       return { ...context };
     },
   };

@@ -2,6 +2,7 @@ export const button = (label: string, handler: (e: Event) => void) => {
   const btn = document.createElement("button");
 
   btn.textContent = label;
+  btn.style.width = "100px";
   btn.addEventListener("click", (e) => {
     e.preventDefault();
     handler(e);

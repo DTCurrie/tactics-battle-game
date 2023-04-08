@@ -1,12 +1,24 @@
 import { button, buttons } from "@tactics-battle-game/ui";
-import { battleStateMachine } from "../state";
+import { BattleContext, battleStateMachine } from "../state";
 import { createMoveTargetState } from "./move-target";
+import { createCommandSelectionState } from "./command-selection";
 
-export const createCommandSelectionUi = () => {
+export const createCommandSelectionUi = ({
+  turn,
+  board,
+}: Pick<BattleContext, "turn" | "board">) => {
+  const move = button("Move", () =>
+    battleStateMachine().transition(createMoveTargetState())
+  );
+
+  const undo = button("Undo Move", () => {
+    turn.undoMove();
+    board.updateSelector(turn.actor().tile().position());
+    battleStateMachine().transition(createCommandSelectionState());
+  });
+
   const btns = buttons([
-    button("Move", () =>
-      battleStateMachine().transition(createMoveTargetState())
-    ),
+    turn.moved() ? undo : move,
     button("Action", () => console.log("action")),
     button("Wait", () => console.log("wait")),
   ]);
