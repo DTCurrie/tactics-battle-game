@@ -6,11 +6,11 @@ import {
   createBoard,
   listLevels,
 } from "@tactics-battle-game/api";
+import { three } from "@tactics-battle-game/three-utils";
 import { BattleState, battleStateMachine } from "../state";
 import { createTurnData, createTurnOrder } from "../turn-order";
-import { createSelectUnitState } from "./select-unit";
-import { three } from "@tactics-battle-game/three-utils";
 import { Unit, createUnit } from "../unit";
+import { createSelectUnitState } from "./select-unit";
 
 const jobColor = (job: "rogue" | "warrior" | "wizard") => {
   switch (job) {

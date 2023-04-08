@@ -15,5 +15,6 @@
     "noImplicitReturns": true,
     "skipLibCheck": true
   },
-  "include": ["src", "src/battle/unit.ts", "../tools/api/src/entity.ts"]
+  "include": ["src"],
+  "references": [{ "path": "../tools/api" }, { "path": "../tools/three-utils" }]
 }

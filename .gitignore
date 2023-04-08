@@ -13,6 +13,9 @@ dist-ssr
 coverage
 *.local
 
+# Sourcemaps
+tsconfig.tsbuildinfo
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

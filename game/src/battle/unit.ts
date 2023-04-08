@@ -1,10 +1,10 @@
 import { nanoid } from "nanoid";
 
-import { Direction } from "../../../tools/api/src/direction";
-import { Stats } from "../../../tools/api/src/stats";
 import {
+  Direction,
   Entity,
   EntityOptions,
+  Stats,
   Tile,
   createEntity,
 } from "@tactics-battle-game/api";

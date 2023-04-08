@@ -11,7 +11,7 @@ export interface Movement {
 }
 
 export const createWalkMovement = (unit: Unit): Movement => {
-  const { logError } = logger(`${unit.address()} Movement`);
+  const { logError, logInfo } = logger(`${unit.address()} Movement`);
 
   const expandSearch = (from: PathfinderData, to: PathfinderData) => {
     if (!to.tile || !from.tile) {
@@ -98,14 +98,14 @@ export const createWalkMovement = (unit: Unit): Movement => {
     const from = target.previous;
     const to = target;
 
-    if (!to.tile || !from || !from.tile) {
-      const logData = {
-        unit: unit.debug(),
-        target,
-        from,
-        to,
-      };
+    const logData = {
+      unit: unit.debug(),
+      target,
+      from,
+      to,
+    };
 
+    if (!to.tile || !from || !from.tile) {
       logError("Undefined tile in pathfinding targets", logData);
       throw new Error("Undefined tile in pathfinding targets", {
         cause: logData,
@@ -116,6 +116,8 @@ export const createWalkMovement = (unit: Unit): Movement => {
     if (unit.direction() !== direction) {
       unit.setDirection(direction);
     }
+
+    logInfo("Moving", { ...logData, direction });
 
     return walkOrJump(from, to);
   }
