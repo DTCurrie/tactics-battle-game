@@ -16,5 +16,9 @@
     "skipLibCheck": true
   },
   "include": ["src"],
-  "references": [{ "path": "../tools/api" }, { "path": "../tools/three-utils" }]
+  "references": [
+    { "path": "../tools/api" },
+    { "path": "../tools/three-utils" },
+    { "path": "../tools/ui" }
+  ]
 }

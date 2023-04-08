@@ -11,7 +11,7 @@ export interface Movement {
 }
 
 export const createWalkMovement = (unit: Unit): Movement => {
-  const { logError, logInfo } = logger(`${unit.address()} Movement`);
+  const { logError } = logger(`${unit.address()} Movement`);
 
   const expandSearch = (from: PathfinderData, to: PathfinderData) => {
     if (!to.tile || !from.tile) {
@@ -29,6 +29,8 @@ export const createWalkMovement = (unit: Unit): Movement => {
     return simpleSearch(unit.stats().move, from.cost);
   };
 
+  const onUpdate = (to: Vector3) => unit.setPosition(to);
+
   const walk = (to: PathfinderData): Tween<Vector3> => {
     if (!to.tile) {
       return new Tween(unit.position()).to(unit.position(), 500);
@@ -38,8 +40,46 @@ export const createWalkMovement = (unit: Unit): Movement => {
 
     return new Tween(unit.position())
       .to(target, 500)
-      .onUpdate((position) => unit.setPosition(position))
+      .onUpdate(onUpdate)
       .start();
+  };
+
+  const jumpHorizontal = (target: Vector3) =>
+    new Tween(unit.position())
+      .to(
+        {
+          x: target.x,
+          z: target.z,
+        },
+        500
+      )
+      .onUpdate(({ x, z }) => onUpdate(new Vector3(x, unit.position().y, z)))
+      .start();
+
+  const jumpVertical = (target: Vector3, jumping: boolean) => {
+    const up = new Tween(unit.position())
+      .to(
+        {
+          y: (jumping ? target : unit.position()).y + 0.5,
+        },
+        250
+      )
+      .easing(Easing.Cubic.Out)
+      .onUpdate(({ y }) =>
+        unit.setPosition(new Vector3(unit.position().x, y, unit.position().z))
+      )
+      .start();
+
+    const down = new Tween(unit.position())
+      .to({ y: target.y }, 250)
+      .easing(Easing.Cubic.Out)
+      .onUpdate(({ y }) =>
+        onUpdate(new Vector3(unit.position().x, y, unit.position().z))
+      );
+
+    up.onComplete(() => down.start());
+
+    return [up, down];
   };
 
   const jump = (to: PathfinderData) => {
@@ -48,47 +88,14 @@ export const createWalkMovement = (unit: Unit): Movement => {
     }
 
     const target = to.tile.top();
+    const jumping = unit.position().y <= target.y;
     const direction = new Vector3().subVectors(target, unit.position());
     direction.normalize();
 
-    const horizontal = new Tween(unit.position())
-      .to(
-        {
-          x: target.x,
-          z: target.z,
-        },
-        500
-      )
-      .onUpdate(({ x, z }) =>
-        unit.setPosition(new Vector3(x, unit.position().y, z))
-      )
-      .start();
+    const horizontal = jumpHorizontal(target);
+    const [up, down] = jumpVertical(target, jumping);
 
-    const vertical = new Tween(unit.position())
-      .to(
-        {
-          y: target.y,
-        },
-        250
-      )
-      .easing(Easing.Cubic.Out)
-      .onUpdate(({ y }) =>
-        unit.setPosition(new Vector3(unit.position().x, y, unit.position().z))
-      )
-      .onComplete(() => {
-        new Tween(unit.position())
-          .to({ y: target.y }, 250)
-          .easing(Easing.Cubic.Out)
-          .onUpdate(({ y }) =>
-            unit.setPosition(
-              new Vector3(unit.position().x, y, unit.position().z)
-            )
-          )
-          .start();
-      })
-      .start();
-
-    return [horizontal, vertical];
+    return [horizontal, up, down];
   };
 
   const walkOrJump = (from: PathfinderData, to: PathfinderData) =>
@@ -117,9 +124,8 @@ export const createWalkMovement = (unit: Unit): Movement => {
       unit.setDirection(direction);
     }
 
-    logInfo("Moving", { ...logData, direction });
-
-    return walkOrJump(from, to);
+    const tweens = walkOrJump(from, to);
+    return tweens;
   }
 
   return {

@@ -24,9 +24,12 @@ export const createStateMachine = <Context>(
   const transition = (next: State<Context>) => {
     context = { ...(state.current?.onExit?.(context, next) ?? context) };
     state = { previous: state.current, current: next };
-    context = {
-      ...(next.onEnter?.(context, state.previous) ?? context),
-    };
+    requestAnimationFrame(
+      () =>
+        (context = {
+          ...(next.onEnter?.(context, state.previous) ?? context),
+        })
+    );
   };
 
   return {

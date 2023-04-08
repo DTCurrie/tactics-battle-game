@@ -21,7 +21,7 @@ export const createMoveTargetState = (): BattleState => {
         path.tile?.setSelected(true);
       }
 
-      return context;
+      return { ...context };
     },
     onExit: (context) => {
       for (const path of paths) {
@@ -30,7 +30,7 @@ export const createMoveTargetState = (): BattleState => {
 
       cleanup();
 
-      return context;
+      return { ...context };
     },
   };
 };

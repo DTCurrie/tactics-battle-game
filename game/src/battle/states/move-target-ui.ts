@@ -28,10 +28,6 @@ export const createMoveTargetUi = (board: Board, pathfinder: Pathfinder) => {
   function onPointerClick(event: MouseEvent) {
     event.preventDefault();
 
-    if (btns.contains(event.target as HTMLElement)) {
-      return;
-    }
-
     raycaster.setFromCamera(pointer, camera);
     const intersects = raycaster.intersectObjects(board.group.children);
     if (!intersects.length) {

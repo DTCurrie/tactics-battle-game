@@ -1,6 +1,5 @@
 import {
   ACESFilmicToneMapping,
-  Clock,
   ColorManagement,
   OrthographicCamera,
   PCFSoftShadowMap,
@@ -8,10 +7,13 @@ import {
   WebGLRenderer,
   sRGBEncoding,
 } from "three";
+import { update as updateTweens } from "@tweenjs/tween.js";
 import { updatesSystem } from "./updates-system";
 import { resizeToDisplay } from "./renderer";
 
 ColorManagement.enabled = true;
+
+const { update, postUpdate } = updatesSystem();
 
 type ThreeInstance = {
   renderer: WebGLRenderer;
@@ -20,7 +22,6 @@ type ThreeInstance = {
   setCamera: (next: OrthographicCamera) => void;
   play: () => void;
   pause: () => void;
-  deltaTime: () => number;
 };
 
 const createThreeManager = (): ThreeInstance => {
@@ -30,31 +31,22 @@ const createThreeManager = (): ThreeInstance => {
   });
 
   const scene = new Scene();
-  const clock = new Clock();
   let camera = new OrthographicCamera();
-  let deltaTime = 0;
 
   const loop = () => {
-    deltaTime = clock.getDelta();
     resizeToDisplay(camera, renderer);
-    updatesSystem().update();
+    update();
+    updateTweens();
     renderer.render(scene, camera);
-    updatesSystem().postUpdate();
+    postUpdate();
   };
 
   const setCamera = (next: OrthographicCamera) => {
     camera = next;
   };
 
-  const play = () => {
-    renderer.setAnimationLoop(loop);
-    clock.start();
-  };
-
-  const pause = () => {
-    renderer.setAnimationLoop(null);
-    clock.stop();
-  };
+  const play = () => renderer.setAnimationLoop(loop);
+  const pause = () => renderer.setAnimationLoop(null);
 
   renderer.useLegacyLights = false;
   renderer.debug.checkShaderErrors = true;
@@ -72,7 +64,6 @@ const createThreeManager = (): ThreeInstance => {
     setCamera,
     play,
     pause,
-    deltaTime: () => deltaTime,
   };
 };
 

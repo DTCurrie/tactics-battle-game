@@ -3,17 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "./dist/api.umd.cjs",
-  "module": "./dist/api.js",
-  "types": "./dist/main.d.ts",
+  "main": "./src/main.ts",
+  "module": "./src/main.ts",
   "exports": {
     ".": {
-      "import": "./dist/api.js",
-      "require": "./dist/api.umd.cjs"
+      "import": "./src/main.ts"
     }
   },
   "scripts": {
-    "dev": "tsc --watch",
     "build": "tsc"
   },
   "peerDependencies": {

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "A game inspired by Final Fantasy Tactics and Megaman Battle Network.",
   "scripts": {
-    "dev": "pnpm -r --parallel --filter='./game' --filter='./server' --filter='./tools/*' run dev",
+    "dev": "pnpm -r --parallel --filter='./game' --filter='./server' --filter='./tools/level-editor' run dev",
     "build": "pnpm -r --parallel --filter='./game' --filter='./server' --filter='./tools/*' run build"
   },
   "devDependencies": {
