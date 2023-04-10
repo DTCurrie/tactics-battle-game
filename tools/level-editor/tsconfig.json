@@ -15,7 +15,7 @@
     "noImplicitReturns": true,
     "skipLibCheck": true
   },
-  "include": ["src"],
+  "include": ["src", "../../ports.json"],
   "references": [
     { "path": "../api" },
     { "path": "../three-utils" },

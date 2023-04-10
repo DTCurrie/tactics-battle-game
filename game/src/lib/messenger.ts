@@ -1,16 +1,18 @@
 import { logger } from "./logger";
 
-type Sender = string;
-type Listener = (sender: Sender, data: unknown) => void;
-type Observer = Listener[];
-type Observers = Record<Sender, Observer>;
-type MessageType = string;
-type ObserversTable = Record<MessageType, Observers>;
+export type Sender = string;
+export type ListenerData = Record<string, unknown>;
+export type Listener = (sender: Sender, data?: ListenerData) => void;
+export type Observer = Listener[];
+export type Observers = Record<Sender, Observer>;
+export type MessageType = string;
+export type ObserversTable = Record<MessageType, Observers>;
 
 const defaultSender = "default" as const;
 
-export type Messenger = {
-  table: () => ObserversTable;
+export type Messenger = Readonly<{
+  table: ObserversTable;
+}> & {
   addObserver: (
     messageType: MessageType,
     handler: Listener,
@@ -23,15 +25,19 @@ export type Messenger = {
     sender?: Sender
   ) => void;
 
-  message: (messageType: MessageType, sender?: Sender, data?: unknown) => void;
+  message: (
+    messageType: MessageType,
+    sender?: Sender,
+    data?: ListenerData
+  ) => void;
   clean: () => void;
 };
 
-const createMessenger = () => {
+const createMessenger = (): Messenger => {
   const table: ObserversTable = {};
   const invoking = new Set<Listener[]>();
 
-  const { logError, logInfo, logWarning } = logger("messenger");
+  const { logError, logWarning } = logger("messenger");
 
   const addObserver = (
     messageType: MessageType,
@@ -57,10 +63,6 @@ const createMessenger = () => {
       }
 
       observers[sender] = [...observer, handler];
-      logInfo("New observer added", {
-        messageType,
-        sender,
-      });
     }
   };
 
@@ -94,17 +96,13 @@ const createMessenger = () => {
     if (index >= 0) {
       observer.splice(index, 1);
       observers[sender] = [...observer];
-      logInfo("Observer removed", {
-        messageType,
-        sender,
-      });
     }
   };
 
   const message = (
     messageType: MessageType,
     sender: Sender = defaultSender,
-    data?: unknown
+    data?: ListenerData
   ) => {
     if (!messageType) {
       logError("Can't post a message with no type", {
@@ -159,7 +157,7 @@ const createMessenger = () => {
   };
 
   return {
-    table: () => table,
+    table,
     addObserver,
     removeObserver,
     message,

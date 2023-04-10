@@ -1,15 +1,15 @@
 import { Vector2Tuple } from "three";
 import { Board } from "@tactics-battle-game/api";
 import { State, StateMachine, createStateMachine } from "../lib/state-machine";
-import { TurnData } from "./turn-order";
-import { Unit } from "./unit";
+import { Turn } from "./turn-order";
+import { Actor } from "./actor";
 
 export type BattleContext = {
   board: Board;
   currentCoordinates: Vector2Tuple;
-  units: Unit[];
-  turn: TurnData & {
-    round?: Generator<Unit>;
+  actors: Actor[];
+  turn: Turn & {
+    round: Generator<Actor>;
   };
 };
 

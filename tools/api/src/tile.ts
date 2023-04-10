@@ -6,80 +6,79 @@ import {
   Vector2Tuple,
   Vector3,
 } from "three";
-import { SETTINGS } from "./settings";
+import { settings } from "./settings";
 import { Entity } from "./entity";
 
 export const tileGeometry = (height: number) =>
-  new BoxGeometry(1, SETTINGS.stepHeight * height, 1);
+  new BoxGeometry(1, settings.stepHeight * height, 1);
 
 export const tileMesh = (color: ColorRepresentation) =>
   new Mesh(tileGeometry(1), new MeshToonMaterial({ color }));
 
 export type TileData = Readonly<{
-  mesh: Mesh;
+  mesh: Mesh<BoxGeometry, MeshToonMaterial>;
   color: ColorRepresentation;
   selectedColor: ColorRepresentation;
+  position: () => Vector2Tuple;
+  height: () => number;
+  selected: () => boolean;
+  content: () => Entity | undefined;
+  top: () => Vector3;
+  calculatedHeight: () => number;
 }>;
 
-export type TileOptions = Partial<Omit<TileData, "mesh">>;
+export type Tile = TileData & {
+  setPosition: (next: Vector2Tuple) => Vector2Tuple;
+  setHeight: (next: number) => number;
+  setSelected: (selecting: boolean) => boolean;
+  setContent: (next?: Entity) => Entity | undefined;
+};
 
-export interface Tile extends TileData {
-  calculatedHeight: () => number;
-  height: () => number;
-  top: () => Vector3;
-  setHeight: (height: number) => void;
-  position: () => Vector2Tuple;
-  setPosition: (position: Vector2Tuple) => void;
-  selected: () => boolean;
-  setSelected: (selecting: boolean) => void;
-  content: () => Entity | undefined;
-  setContent: (content?: Entity | undefined) => void;
-}
+export type TileOptions = Pick<Partial<TileData>, "color" | "selectedColor"> & {
+  mesh?: Mesh<BoxGeometry, MeshToonMaterial>;
+};
 
 export const createTile = ({
+  mesh: meshProp,
   color = "forestgreen",
   selectedColor = "limegreen",
 }: TileOptions): Tile => {
-  const mesh = tileMesh(color);
+  const mesh = meshProp ?? tileMesh(color);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
 
   let position: Vector2Tuple = [0, 0];
-  let baseHeight = 0;
-  let content: Entity | undefined;
+  let height = 0;
+  let content: Entity | undefined = undefined;
   let selected = false;
 
-  const height = () => baseHeight;
   const calculatedHeight = () => mesh.geometry.parameters.height;
+  const top = () => new Vector3(position[0], calculatedHeight(), position[1]);
 
-  const top = (): Vector3 =>
-    new Vector3(position[0], calculatedHeight(), position[1]);
+  const setPosition = ([x, y]: Vector2Tuple): Vector2Tuple => {
+    mesh.position.set(x, calculatedHeight() / 2, y);
+    position = [x, y];
+    return [x, y];
+  };
 
-  const setHeight = (next: number) => {
+  const setHeight = (next: number): number => {
     const geometry = tileGeometry(next);
     mesh.geometry.dispose();
     mesh.geometry = geometry;
     setPosition(position);
-    baseHeight = next;
+    height = next;
+    return next;
   };
 
-  const setPosition = ([x, y]: Vector2Tuple) => {
-    mesh.position.set(x, calculatedHeight() / 2, y);
-    position = [x, y];
+  const setSelected = (next: boolean): boolean => {
+    mesh.material.color.set(next ? selectedColor : color);
+    selected = next;
+    return next;
   };
 
-  const setSelected = (selecting: boolean) => {
-    selected = selecting;
-    mesh.material.color.set(selecting ? selectedColor : color);
-  };
-
-  const setContent = (next?: Entity) => {
-    if (next) {
-      content = next;
-      return;
-    }
-
-    content = undefined;
+  const setContent = (next?: Entity): Entity | undefined => {
+    content = next;
+    return next;
   };
 
   return {
@@ -87,18 +86,17 @@ export const createTile = ({
     color,
     selectedColor,
 
-    height,
-    calculatedHeight,
-    top,
-    setHeight,
-
+    height: () => height,
     position: () => position,
-    setPosition,
-
     selected: () => selected,
-    setSelected,
-
     content: () => content,
+
+    top,
+    calculatedHeight,
+
+    setHeight,
+    setPosition,
+    setSelected,
     setContent,
   };
 };

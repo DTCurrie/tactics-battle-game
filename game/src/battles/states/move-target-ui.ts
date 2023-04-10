@@ -1,7 +1,7 @@
 import { Raycaster, Vector2, Vector2Tuple } from "three";
 import { button, buttons } from "@tactics-battle-game/ui";
 import { three, updatesSystem } from "@tactics-battle-game/three-utils";
-import { battleStateMachine } from "../state";
+import { battleStateMachine } from "../battle-state-machine";
 import { createCommandSelectionState } from "./command-selection";
 import { Board } from "@tactics-battle-game/api";
 import { createMoveSequenceState } from "./move-sequence";
@@ -28,7 +28,7 @@ export const createMoveTargetUi = (board: Board, pathfinder: Pathfinder) => {
   function onPointerClick(event: MouseEvent) {
     event.preventDefault();
 
-    raycaster.setFromCamera(pointer, camera);
+    raycaster.setFromCamera(pointer, camera());
     const intersects = raycaster.intersectObjects(board.group.children);
     if (!intersects.length) {
       return;
@@ -46,16 +46,16 @@ export const createMoveTargetUi = (board: Board, pathfinder: Pathfinder) => {
     }
 
     battleStateMachine().transition(
-      createMoveSequenceState(pathfinder.map()[x][y])
+      createMoveSequenceState(pathfinder.paths.get()[x][y])
     );
   }
 
   const raycast = () => {
-    raycaster.setFromCamera(pointer, camera);
+    raycaster.setFromCamera(pointer, camera());
 
     const intersects = raycaster.intersectObjects(board.group.children);
     if (intersects.length) {
-      board.updateSelector([
+      board.moveSelector([
         Math.floor(intersects[0].object.position.x),
         Math.floor(intersects[0].object.position.z),
       ]);

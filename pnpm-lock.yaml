@@ -31,6 +31,9 @@ importers:
       nanoid:
         specifier: ^3.3.6
         version: 3.3.6
+      nanostores:
+        specifier: ^0.8.0
+        version: 0.8.0
       three:
         specifier: ^0.151.2
         version: 0.151.2
@@ -87,6 +90,9 @@ importers:
       nanoid:
         specifier: ^3.3.6
         version: 3.3.6
+      nanostores:
+        specifier: ^0.7.4
+        version: 0.7.4
     devDependencies:
       '@types/three':
         specifier: ^0.150.0
@@ -2538,6 +2544,16 @@ packages:
     resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  /nanostores@0.7.4:
+    resolution: {integrity: sha512-MBeUVt7NBcXqh7AGT+KSr3O0X/995CZsvcP2QEMP+PXFwb07qv3Vjyq+EX0yS8f12Vv3Tn2g/BvK/OZoMhJlOQ==}
+    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
+    dev: false
+
+  /nanostores@0.8.0:
+    resolution: {integrity: sha512-Xgs3qwYhNYXyglDe41JEtACDvFZELFRofDBqBuJ02JG1mrwXWneQTsk89GHvW0bgLPcWXOz4GRm4enwgjnD8FQ==}
+    engines: {node: ^16.0.0 || >=18.0.0}
+    dev: false
 
   /natural-compare-lite@1.4.0:
     resolution: {integrity: sha512-Tj+HTDSJJKaZnfiuw+iaF9skdPpTo2GtEly5JHnWV/hfv2Qj/9RKsGISQtLh2ox3l5EAGw487hnBee0sIJ6v2g==}

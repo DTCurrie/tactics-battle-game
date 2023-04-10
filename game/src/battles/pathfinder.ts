@@ -1,18 +1,18 @@
 import {
   Board,
-  SETTINGS,
+  settings,
   Tile,
   normalizedDirections,
 } from "@tactics-battle-game/api";
 import { Vector2Tuple } from "three";
 import { createQueue } from "../lib/queue";
-import { Movement } from "./movement";
+import { ReadableAtom, action, atom } from "nanostores";
 
 export type PathfinderData = {
   previous?: PathfinderData;
   coordinates: Vector2Tuple;
   cost: number;
-  tile?: Tile;
+  tile: Tile;
 };
 
 export const simpleSearch = (range: number, cost: number) => cost + 1 <= range;
@@ -21,7 +21,7 @@ export const filterPath = (paths: PathfinderData[]) => {
   const filtered = [];
 
   for (const path of paths) {
-    if (!path.tile?.content()) {
+    if (path.tile?.content() === undefined) {
       filtered.push(path);
     }
   }
@@ -29,31 +29,43 @@ export const filterPath = (paths: PathfinderData[]) => {
   return filtered;
 };
 
-export type Pathfinder = {
-  map: () => PathfinderData[][];
+export type Pathfinder = Readonly<{
+  paths: ReadableAtom<PathfinderData[][]>;
+}> & {
   reset: () => void;
   getPathsInRange: (start: PathfinderData) => PathfinderData[];
 };
 
-export const createPathfinder = (board: Board, movement: Movement) => {
-  const map: PathfinderData[][] = Array.from(
-    { length: SETTINGS.board.width },
-    () => Array.from({ length: SETTINGS.board.depth })
+export const createPathfinder = (
+  board: Board,
+  expandSearch: (from: PathfinderData, to: PathfinderData) => boolean
+): Pathfinder => {
+  const paths = atom<PathfinderData[][]>(
+    Array.from({ length: settings.board.width }, () =>
+      Array.from({ length: settings.board.depth })
+    )
   );
 
-  const reset = () => {
-    for (let x = 0; x < SETTINGS.board.width; x++) {
-      for (let y = 0; y < SETTINGS.board.depth; y++) {
+  const reset = action(paths, "reset", (store) => {
+    const next: PathfinderData[][] = Array.from(
+      { length: settings.board.width },
+      () => Array.from({ length: settings.board.depth })
+    );
+
+    for (let x = 0; x < settings.board.width; x++) {
+      for (let y = 0; y < settings.board.depth; y++) {
         const coordinates: Vector2Tuple = [x, y];
 
-        map[x][y] = {
+        next[x][y] = {
           coordinates,
           cost: Number.MAX_SAFE_INTEGER,
           tile: board.getTile(coordinates),
         };
       }
     }
-  };
+
+    store.set(next);
+  });
 
   const rangeSearch = (
     start: PathfinderData,
@@ -67,18 +79,19 @@ export const createPathfinder = (board: Board, movement: Movement) => {
     frontier.enqueue(start);
 
     while (frontier.count() > 0) {
-      // if there is a count, something can be dequeued
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const path = frontier.dequeue()!;
+      const path = frontier.dequeue();
+      if (!path) {
+        break;
+      }
 
       for (const direction of normalizedDirections) {
-        const col = map[path.coordinates[0] + direction[0]];
+        const col = paths.get()[path.coordinates[0] + direction[0]];
         if (!col) {
           continue;
         }
 
         const neighbor =
-          map[path.coordinates[0] + direction[0]][
+          paths.get()[path.coordinates[0] + direction[0]][
             path.coordinates[1] + direction[1]
           ];
 
@@ -91,7 +104,8 @@ export const createPathfinder = (board: Board, movement: Movement) => {
         }
 
         if (checkCost(path, neighbor)) {
-          neighbor.cost = path.cost + 1;
+          const offset = (neighbor.tile.height() - path.tile.height()) / 2;
+          neighbor.cost = path.cost + offset + 1;
           neighbor.previous = path;
 
           if (!visited.includes(neighbor)) {
@@ -105,15 +119,13 @@ export const createPathfinder = (board: Board, movement: Movement) => {
     return visited;
   };
 
-  const getPathsInRange = (start: PathfinderData) => {
-    const paths = filterPath(rangeSearch(start, movement.expandSearch));
-    return paths;
-  };
+  const getPathsInRange = (start: PathfinderData) =>
+    filterPath(rangeSearch(start, expandSearch));
 
   reset();
 
   return {
-    map: () => map,
+    paths,
     reset,
     getPathsInRange,
   };

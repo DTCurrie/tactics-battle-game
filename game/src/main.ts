@@ -1,8 +1,8 @@
 import { DirectionalLight } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { three, updatesSystem } from "@tactics-battle-game/three-utils";
-import { battleStateMachine } from "./battle/state";
-import { createInitBattleState } from "./battle/states/init-battle";
+import { battleStateMachine } from "./battles/battle-state-machine";
+import { createInitBattleState } from "./battles/states/init-battle";
 
 const { scene, camera, renderer, play } = three();
 const { addUpdate } = updatesSystem();
@@ -12,14 +12,14 @@ light.position.set(0, 1, 0);
 light.castShadow = true;
 scene.add(light);
 
-const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera(), renderer.domElement);
 controls.update();
 
 battleStateMachine().transition(createInitBattleState());
 
 addUpdate(() => {
   controls.update();
-  camera.updateMatrixWorld();
+  camera().updateMatrixWorld();
 });
 
 play();

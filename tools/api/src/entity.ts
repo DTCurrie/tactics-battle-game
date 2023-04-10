@@ -1,91 +1,78 @@
-import { nanoid } from "nanoid";
 import { Box3, Mesh, Quaternion, Vector3 } from "three";
-import { Direction } from "./direction";
+import { Direction, toEuler } from "./direction";
+import { ReadableAtom, action, atom, computed } from "nanostores";
 
-export type EntityData = Readonly<{
-  id: string;
-  mesh: Mesh;
-}>;
-
-export type Entity = EntityData & {
-  address: () => string;
-
-  name: () => string;
-  setName: (next: string) => void;
-
-  position: () => Vector3;
-  setPosition: (position: Vector3) => void;
-
-  rotation: () => Quaternion;
-  setRotation: (towards: Quaternion) => void;
-
-  direction: () => Direction;
-  setDirection: (towards: Direction) => void;
-
-  height: () => number;
-
+export type Entity = Readonly<{
+  mesh: ReadableAtom<Mesh>;
+  position: ReadableAtom<Vector3>;
+  rotation: ReadableAtom<Quaternion>;
+  direction: ReadableAtom<Direction>;
+  height: ReadableAtom<number>;
+}> & {
+  setPosition: (position: Vector3) => Vector3;
+  setRotation: (towards: Quaternion) => Quaternion;
+  setDirection: (to: Direction) => Direction;
   debug: () => string;
 };
 
 export type EntityOptions = {
-  id?: string;
   mesh: Mesh;
-  name: string;
 };
 
-export const createEntity = ({
-  name: initialName,
-  mesh,
-  id = nanoid(),
-}: EntityOptions): Entity => {
-  const { min, max } = new Box3().setFromObject(mesh);
-  const height = max.y - min.y;
-  let name = `${initialName}`;
-  let position: Vector3 = new Vector3();
-  let direction: Direction = Direction.North;
+export const createEntity = ({ mesh: meshProp }: EntityOptions): Entity => {
+  const mesh = atom<Mesh>(meshProp);
+  const position = atom<Vector3>(mesh.get().position);
+  const rotation = atom<Quaternion>(mesh.get().quaternion);
+  const direction = atom<Direction>(Direction.North);
 
-  const setName = (next: string) => (name = next);
+  const box = computed(mesh, (next: Mesh) => new Box3().setFromObject(next));
+  const height = computed(box, (next: Box3) => next.max.y - next.min.y);
 
-  const setPosition = ({ x, y, z }: Vector3) => {
-    mesh.position.set(x, y + height / 2, z);
-    position = new Vector3(x, y, z);
-  };
+  const setPosition = action(position, "setPosition", (store, next) => {
+    const { x, y, z } = next;
+    mesh.get().position.set(x, y + height.get() / 2, z);
+    store.set(new Vector3(x, y, z));
+    return next;
+  });
 
-  const setRotation = (towards: Quaternion) => {
-    mesh.quaternion.copy(towards);
-  };
+  const setRotation = action(
+    rotation,
+    "setRotation",
+    (store, next: Quaternion) => {
+      mesh.get().quaternion.copy(next);
+      store.set(next);
+      return next;
+    }
+  );
 
-  const setDirection = (towards: Direction) => {
-    direction = towards;
-  };
+  const setDirection = action(
+    direction,
+    "setDirection",
+    (store, next: Direction) => {
+      setRotation(new Quaternion().setFromEuler(toEuler(next)));
+      store.set(next);
+      return next;
+    }
+  );
 
   return {
-    id,
     mesh,
+    position,
+    rotation,
+    direction,
+    height,
 
-    address: () => `${name} [${id}]`,
-
-    name: () => name,
-    setName,
-
-    position: () => position,
     setPosition,
-
-    rotation: () => mesh.quaternion,
     setRotation,
-
-    direction: () => direction,
     setDirection,
-
-    height: () => height,
 
     debug: () =>
       JSON.stringify(
         {
-          id,
           mesh,
-          name,
-          direction,
+          position: position.get(),
+          rotation: rotation.get(),
+          direction: direction.get(),
         },
         undefined,
         2

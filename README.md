@@ -44,6 +44,16 @@ pnpm run dev
 
 This will start the `vite` development server and open the game in your browser window. From here, any of your changes should be automatically picked up and refreshed.
 
+### Running the Level Editor
+
+To run the game, first start the development server with:
+
+```bash
+pnpm run level-editor
+```
+
+This will start the `vite` development server and open the game in your browser window. From here, any of your changes should be automatically picked up and refreshed.
+
 ### Building the Game
 
 To build the game into its production assets, run:

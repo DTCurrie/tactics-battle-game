@@ -1,4 +1,4 @@
-import { BattleState, battleStateMachine } from "../state";
+import { BattleState, battleStateMachine } from "../battle-state-machine";
 import { PathfinderData } from "../pathfinder";
 import { createMoveStepState } from "./move-step";
 

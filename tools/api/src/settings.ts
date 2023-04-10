@@ -1,4 +1,13 @@
-export const SETTINGS = {
+export type Settings = Readonly<{
+  board: {
+    width: number;
+    height: number;
+    depth: number;
+  };
+  stepHeight: number;
+}>;
+
+export const settings: Settings = {
   board: {
     width: 10,
     height: 8,
