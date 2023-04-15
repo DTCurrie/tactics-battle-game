@@ -1,9 +1,4 @@
 export type StateMachine<Context> = {
-  context: () => Context;
-  state: () => {
-    previous?: State<Context>;
-    current?: State<Context>;
-  };
   transition: (next: State<Context>) => void;
 };
 
@@ -24,17 +19,16 @@ export const createStateMachine = <Context>(
   const transition = (next: State<Context>) => {
     context = { ...(state.current?.onExit?.(context, next) ?? context) };
     state = { previous: state.current, current: next };
-    requestAnimationFrame(
+    setTimeout(
       () =>
         (context = {
           ...(next.onEnter?.(context, state.previous) ?? context),
-        })
+        }),
+      0
     );
   };
 
   return {
-    state: () => state,
-    context: () => context,
     transition,
   };
 };

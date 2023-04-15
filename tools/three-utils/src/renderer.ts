@@ -1,5 +1,11 @@
 import { OrthographicCamera, WebGLRenderer } from "three";
 
+export const createRenderer = () =>
+  new WebGLRenderer({
+    canvas: document.querySelector<HTMLCanvasElement>("#canvas") ?? undefined,
+    powerPreference: "high-performance",
+  });
+
 const frustumSize = 10;
 export const resizeToDisplay = (
   camera: OrthographicCamera,

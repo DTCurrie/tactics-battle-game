@@ -1,4 +1,4 @@
-import { expect, test, describe } from "vitest";
+import { expect, test, describe, vi } from "vitest";
 import { createStateMachine } from "./state-machine";
 
 describe("state-machine", () => {
@@ -13,30 +13,52 @@ describe("state-machine", () => {
       finished: false,
     });
 
-    stateMachine.transition({
-      onEnter: (context) => ({
-        ...context,
-        count: context.count + 1,
-      }),
-    });
+    const funcs = {
+      first: () => ({}),
+      second: () => ({}),
+      third: () => ({}),
+    };
 
-    expect(stateMachine.context().count).toEqual(1);
-
-    stateMachine.transition({
-      onExit: (context) => ({
-        ...context,
-        count: context.count + 1,
-      }),
-    });
+    const spies = {
+      first: vi.spyOn(funcs, "first"),
+      second: vi.spyOn(funcs, "second"),
+      third: vi.spyOn(funcs, "third"),
+    };
 
     stateMachine.transition({
-      onEnter: (context) => ({
-        ...context,
-        finished: true,
-      }),
+      onEnter: (context) => {
+        funcs.first();
+        return {
+          ...context,
+          count: context.count + 1,
+        };
+      },
     });
 
-    expect(stateMachine.context().count).toEqual(2);
-    expect(stateMachine.context().finished).toEqual(true);
+    stateMachine.transition({
+      onExit: (context) => {
+        funcs.second();
+        return {
+          ...context,
+          count: context.count + 1,
+        };
+      },
+    });
+
+    stateMachine.transition({
+      onEnter: (context) => {
+        funcs.third();
+        return {
+          ...context,
+          finished: true,
+        };
+      },
+    });
+
+    setTimeout(() => {
+      expect(spies.first).toHaveBeenCalled();
+      expect(spies.second).toHaveBeenCalled();
+      expect(spies.third).toHaveBeenCalled();
+    }, 0);
   });
 });

@@ -1,6 +1,6 @@
 import { Vector2, WebGLRenderer } from "three";
 import { nanoid } from "nanoid";
-import { SETTINGS, createLevel } from "@tactics-battle-game/api";
+import { settings, createLevel } from "@tactics-battle-game/api";
 import { button, buttons } from "@tactics-battle-game/ui";
 import { LevelEditor } from "./editor";
 
@@ -18,7 +18,7 @@ export const createLevelEditorUi = (
   const btns = buttons([
     button("Set Random Height", () =>
       levelEditor.adjustRandom(
-        Math.floor(Math.random() * SETTINGS.board.height)
+        Math.floor(Math.random() * settings.board.height)
       )
     ),
     button("Set Random Ground", () => levelEditor.adjustRandom(1)),
@@ -27,7 +27,7 @@ export const createLevelEditorUi = (
 
       function randomizer() {
         levelEditor.adjustRandom(
-          Math.floor(Math.random() * SETTINGS.board.height)
+          Math.floor(Math.random() * settings.board.height)
         );
         count++;
         if (count < 100) {

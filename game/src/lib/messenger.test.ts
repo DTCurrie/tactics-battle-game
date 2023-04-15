@@ -50,18 +50,18 @@ describe("messenger", () => {
     addObserver("test-a", handler, sender);
     addObserver("test-b", handler, sender);
 
-    expect(table()["test-a"][sender].length).toEqual(1);
-    expect(table()["test-b"][sender].length).toEqual(1);
+    expect(table["test-a"][sender].length).toEqual(1);
+    expect(table["test-b"][sender].length).toEqual(1);
 
     removeObserver("test-a", handler, sender);
 
-    expect(table()["test-a"][sender].length).toEqual(0);
-    expect(table()["test-b"][sender].length).toEqual(1);
+    expect(table["test-a"][sender].length).toEqual(0);
+    expect(table["test-b"][sender].length).toEqual(1);
 
     clean();
 
-    expect(table()["test-a"]).toBeUndefined();
-    expect(table()["test-b"][sender].length).toEqual(1);
+    expect(table["test-a"]).toBeUndefined();
+    expect(table["test-b"][sender].length).toEqual(1);
   });
 
   test("performance", () => {

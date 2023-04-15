@@ -7,8 +7,6 @@ import { LevelData } from "@tactics-battle-game/api";
 type DB = {
   levels: LevelData[];
 };
-
-const portsPath = resolve(__dirname, "../../ports.json");
 const dataPath = resolve(__dirname, "../data");
 const dbPath = resolve(dataPath, "db.json");
 
@@ -56,24 +54,8 @@ const createDbFile = () => {
   }
 };
 
-const readPortsFile = () => {
-  try {
-    const data = readFileSync(portsPath, null);
-    const db = JSON.parse(data.toString());
-    console.log("Got ports configuration file!");
-    return db;
-  } catch {
-    console.log(
-      "Could not read the ports file, returning the default port of 3000!"
-    );
-    return { server: 3000 };
-  }
-};
-
 createDataDir();
 readDbFile();
-
-const { server } = readPortsFile();
 
 const app = create();
 const routes = router(dbPath);
@@ -96,6 +78,6 @@ app.use((req, _res, next) => {
 });
 
 app.use("/api", routes);
-app.listen(server, () => {
+app.listen(3000, () => {
   console.log("JSON Server is running!");
 });

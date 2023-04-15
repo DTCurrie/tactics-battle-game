@@ -9,7 +9,8 @@ import {
 } from "three";
 import { update as updateTweens } from "@tweenjs/tween.js";
 import { updatesSystem } from "./updates-system";
-import { resizeToDisplay } from "./renderer";
+import { createRenderer, resizeToDisplay } from "./renderer";
+import { createCamera } from "./camera";
 
 ColorManagement.enabled = true;
 
@@ -18,20 +19,16 @@ const { update, postUpdate } = updatesSystem();
 type ThreeInstance = {
   renderer: WebGLRenderer;
   scene: Scene;
-  camera: OrthographicCamera;
-  setCamera: (next: OrthographicCamera) => void;
+  camera: () => OrthographicCamera;
+  setCamera: (next: OrthographicCamera) => OrthographicCamera;
   play: () => void;
   pause: () => void;
 };
 
 const createThreeManager = (): ThreeInstance => {
-  const renderer = new WebGLRenderer({
-    canvas: document.querySelector<HTMLCanvasElement>("#canvas") ?? undefined,
-    powerPreference: "high-performance",
-  });
-
+  const renderer = createRenderer();
   const scene = new Scene();
-  let camera = new OrthographicCamera();
+  let camera = createCamera();
 
   const loop = () => {
     resizeToDisplay(camera, renderer);
@@ -43,6 +40,7 @@ const createThreeManager = (): ThreeInstance => {
 
   const setCamera = (next: OrthographicCamera) => {
     camera = next;
+    return next;
   };
 
   const play = () => renderer.setAnimationLoop(loop);
@@ -60,7 +58,7 @@ const createThreeManager = (): ThreeInstance => {
   return {
     renderer,
     scene,
-    camera,
+    camera: () => camera,
     setCamera,
     play,
     pause,

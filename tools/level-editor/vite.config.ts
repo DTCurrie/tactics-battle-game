@@ -3,6 +3,7 @@ import { levelCreator } from "../../ports.json";
 
 export default defineConfig({
   server: {
-    port: levelCreator,
+    port: 8081,
+    strictPort: true,
   },
 });

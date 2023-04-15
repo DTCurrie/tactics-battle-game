@@ -11,7 +11,7 @@ const editor = levelEditor();
 const raycaster = new Raycaster();
 const { pointer } = createLevelEditorUi(renderer, editor);
 
-const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera(), renderer.domElement);
 controls.update();
 
 const light = new DirectionalLight(0xffffff, 1);
@@ -20,9 +20,9 @@ light.castShadow = true;
 scene.add(light);
 
 addUpdate(() => {
-  camera.updateMatrixWorld();
+  camera().updateMatrixWorld();
   controls.update();
-  raycaster.setFromCamera(pointer, camera);
+  raycaster.setFromCamera(pointer, camera());
 
   const intersects = raycaster.intersectObjects(editor.board.children);
   if (intersects.length) {

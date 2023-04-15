@@ -3,7 +3,7 @@ import {
   Tile,
   createBoard,
   createTile,
-  SETTINGS,
+  settings,
 } from "@tactics-battle-game/api";
 import { three } from "@tactics-battle-game/three-utils";
 
@@ -21,13 +21,18 @@ export type LevelEditor = {
   adjustCurrent: (height: number) => void;
   adjustRect: (rect: Rect, height: number) => void;
   adjustRandom: (height: number) => void;
-  clearGrid: () => void;
   setSelector: ([x, y]: Vector2Tuple) => void;
   getTileData: () => Vector3Tuple[];
 };
 
 const createLevelEditor = (): LevelEditor => {
-  const { group, grid, getTile, setTile, updateSelector } = createBoard({
+  const {
+    group,
+    grid,
+    getTile,
+    setTile,
+    moveSelector: updateSelector,
+  } = createBoard({
     id: "",
     name: "",
     tileData: [],
@@ -48,15 +53,15 @@ const createLevelEditor = (): LevelEditor => {
   };
 
   const randomRect = (): Rect => {
-    const x = Math.floor(Math.random() * SETTINGS.board.width);
-    const y = Math.floor(Math.random() * SETTINGS.board.depth);
+    const x = Math.floor(Math.random() * settings.board.width);
+    const y = Math.floor(Math.random() * settings.board.depth);
 
     const width = Math.floor(
-      Math.floor(Math.random() * (SETTINGS.board.width - x)) + 1
+      Math.floor(Math.random() * (settings.board.width - x)) + 1
     );
 
     const depth = Math.floor(
-      Math.floor(Math.random() * (SETTINGS.board.depth - y)) + 1
+      Math.floor(Math.random() * (settings.board.depth - y)) + 1
     );
 
     return { x, y, width, depth };
@@ -65,9 +70,9 @@ const createLevelEditor = (): LevelEditor => {
   const adjustSingle = ([x, y]: Vector2Tuple, height: number) => {
     if (height > 0) {
       const tile = getOrCreateTile([x, y]);
-      if (tile.height() < SETTINGS.board.height) {
-        if (tile.height() > SETTINGS.board.height) {
-          tile.setHeight(SETTINGS.board.height - tile.height());
+      if (tile.height() < settings.board.height) {
+        if (tile.height() > settings.board.height) {
+          tile.setHeight(settings.board.height - tile.height());
           return;
         }
 
@@ -84,12 +89,6 @@ const createLevelEditor = (): LevelEditor => {
 
     const tile = getTile([x, y]) as Tile;
     tile.setHeight(height);
-
-    if (tile.height() <= 0) {
-      setTile([x, y], undefined);
-      group.remove(tile.mesh);
-      return;
-    }
 
     setTile([x, y], tile);
   };
@@ -109,17 +108,6 @@ const createLevelEditor = (): LevelEditor => {
 
   const adjustRandom = (height: number) => adjustRect(randomRect(), height);
 
-  const clearGrid = () => {
-    for (const cols of grid()) {
-      for (const tile of cols) {
-        if (tile) {
-          scene.remove(tile.mesh);
-          grid()[tile.mesh.position.x][tile.mesh.position.z] = undefined;
-        }
-      }
-    }
-  };
-
   const setSelector = ([x, y]: Vector2Tuple) => {
     currentCoordinates = [x, y];
     updateSelector([x, y]);
@@ -128,7 +116,7 @@ const createLevelEditor = (): LevelEditor => {
   const getTileData = (): Vector3Tuple[] => {
     const tiles: Vector3Tuple[] = [];
 
-    for (const col of grid()) {
+    for (const col of grid) {
       for (const tile of col) {
         if (tile) {
           tiles.push([
@@ -146,17 +134,16 @@ const createLevelEditor = (): LevelEditor => {
   scene.background = new Color(0xffffff);
   scene.add(group);
 
-  camera.position.y = SETTINGS.board.width / 2;
-  camera.position.y = 10;
-  camera.position.z = 10;
-  camera.lookAt(group.position);
+  camera().position.y = settings.board.width / 2;
+  camera().position.y = 10;
+  camera().position.z = 10;
+  camera().lookAt(group.position);
 
   return {
     board: group,
     adjustCurrent,
     adjustRect,
     adjustRandom,
-    clearGrid,
     setSelector,
     getTileData,
   };
