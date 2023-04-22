@@ -2,12 +2,8 @@
 node_modules
 
 # Ignore test coverage:
-game/coverage
-server/coverage
-tools/**/*/coverage
+coverage
 
 # Ignore artifacts:
-game/dist
-server/dist
-tools/**/*/dist
+dist
 

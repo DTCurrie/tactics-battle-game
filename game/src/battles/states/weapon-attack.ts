@@ -1,5 +1,5 @@
-import { WeaponSlot } from "../../units/equipment";
-import { createWeaponAttack } from "../abilities/weapon-attack";
+import { WeaponSlot } from "@equipment";
+import { createWeaponPower } from "../actions/weapon-power";
 import { BattleState, battleStateMachine } from "../battle-state-machine";
 import { createCommandSelectionState } from "./command-selection";
 
@@ -7,23 +7,24 @@ export const createWeaponAttackState = (
   slot: WeaponSlot = "mainHand"
 ): BattleState => {
   return {
-    onEnter: (context) => {
-      const attack = createWeaponAttack(context.turn.actor.get());
+    onEnter: ({ turn }) => {
+      const actor = turn.actor();
+      const attack = createWeaponPower();
       console.log("attack", { slot, attack });
 
-      const again =
-        slot === "mainHand" &&
-        context.turn.actor.get().equipment.get().slots.get().offHand;
+      const again = Boolean(
+        slot === "mainHand" && actor.equipment().slots().offHand
+      );
 
       if (again) {
         battleStateMachine().transition(createWeaponAttackState("offHand"));
-        return { ...context };
+        return {};
       }
 
-      context.turn.acted.set(true);
+      turn.setActed(true);
       battleStateMachine().transition(createCommandSelectionState());
 
-      return { ...context };
+      return {};
     },
   };
 };

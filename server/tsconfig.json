@@ -17,5 +17,5 @@
     "rootDir": "src"
   },
   "include": ["src"],
-  "references": [{ "path": "../tools/api" }]
+  "references": [{ "path": "../core" }]
 }

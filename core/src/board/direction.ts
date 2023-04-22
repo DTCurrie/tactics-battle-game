@@ -43,11 +43,11 @@ export const getHeading = (
 export const getNormal = (direction: Direction): Vector2Tuple => {
   switch (direction) {
     case Direction.North:
-      return [0, -1];
+      return [0, 1];
     case Direction.East:
       return [1, 0];
     case Direction.South:
-      return [0, 1];
+      return [0, -1];
     default:
       return [-1, 0];
   }

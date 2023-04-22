@@ -1,16 +1,25 @@
 import { Vector2Tuple } from "three";
-import { Board } from "@tactics-battle-game/api";
-import { State, StateMachine, createStateMachine } from "../lib/state-machine";
+import { Board, Tile } from "@tactics-battle-game/core";
+import { State, StateMachine, createStateMachine } from "@lib/state-machine";
 import { Turn } from "./turn-order";
 import { Actor } from "./actor";
+import { Factions } from "./faction";
 
-export type BattleContext = {
+export type BattleUi = {
+  dispose: () => void;
+};
+
+export type BattleContext = Readonly<{
   board: Board;
   currentCoordinates: Vector2Tuple;
-  actors: Actor[];
+  factions: Factions;
+  targets: Tile[];
+  ui: BattleUi;
   turn: Turn & {
     round: Generator<Actor>;
   };
+}> & {
+  getActorAtPosition: (position: Vector2Tuple) => Actor | undefined;
 };
 
 export type BattleState = State<BattleContext>;

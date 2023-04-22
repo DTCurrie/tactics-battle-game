@@ -1,4 +1,4 @@
-import { getHeading } from "@tactics-battle-game/api";
+import { getHeading } from "@tactics-battle-game/core";
 import { Vector3 } from "three";
 import { PathfinderData, simpleSearch } from "./pathfinder";
 import { logger } from "../lib/logger";
@@ -19,7 +19,7 @@ export const expandWalkSearch = (
     return false;
   }
 
-  if (to.tile.content() !== undefined) {
+  if (to.tile.occupied()) {
     return false;
   }
 
@@ -35,26 +35,31 @@ export const expandWalkSearch = (
 
 export const createWalkMovement = ({
   position,
-  direction,
   address,
   setPosition,
+  setDirection,
   debug,
 }: Actor): Movement => {
   const { logError } = logger(`${address} Movement`);
 
-  const onUpdate = (to: Vector3) => setPosition(to);
+  const updatePosition = (to: Vector3) => setPosition(to);
 
   const walk = (to: PathfinderData): Tween<Vector3> => {
     if (!to.tile) {
-      return new Tween(position.get()).to(position.get(), 500);
+      return new Tween(position()).to(position(), 500);
     }
 
     const target = to.tile.top();
-    return new Tween(position.get()).to(target, 500).onUpdate(onUpdate).start();
+    return new Tween(position())
+      .to(target, 500)
+      .onUpdate((next) => {
+        updatePosition(next);
+      })
+      .start();
   };
 
   const jumpHorizontal = (target: Vector3) =>
-    new Tween(position.get())
+    new Tween(position())
       .to(
         {
           x: target.x,
@@ -62,29 +67,31 @@ export const createWalkMovement = ({
         },
         500
       )
-      .onUpdate(({ x, z }) => onUpdate(new Vector3(x, position.get().y, z)))
+      .onUpdate(({ x, z }) => {
+        updatePosition(new Vector3(x, position().y, z));
+      })
       .start();
 
   const jumpVertical = (target: Vector3, jumping: boolean) => {
-    const up = new Tween(position.get())
+    const up = new Tween(position())
       .to(
         {
-          y: (jumping ? target : position.get()).y + 0.5,
+          y: (jumping ? target : position()).y + 0.25,
         },
         250
       )
-      .easing(Easing.Cubic.Out)
-      .onUpdate(({ y }) =>
-        setPosition(new Vector3(position.get().x, y, position.get().z))
-      )
+      .easing(Easing.Cubic.In)
+      .onUpdate(({ y }) => {
+        setPosition(new Vector3(position().x, y, position().z));
+      })
       .start();
 
-    const down = new Tween(position.get())
+    const down = new Tween(position())
       .to({ y: target.y }, 250)
       .easing(Easing.Cubic.Out)
-      .onUpdate(({ y }) =>
-        onUpdate(new Vector3(position.get().x, y, position.get().z))
-      );
+      .onUpdate(({ y }) => {
+        updatePosition(new Vector3(position().x, y, position().z));
+      });
 
     up.onComplete(() => down.start());
 
@@ -97,8 +104,8 @@ export const createWalkMovement = ({
     }
 
     const target = to.tile.top();
-    const jumping = position.get().y <= target.y;
-    const direction = new Vector3().subVectors(target, position.get());
+    const jumping = position().y <= target.y;
+    const direction = new Vector3().subVectors(target, position());
     direction.normalize();
 
     const horizontal = jumpHorizontal(target);
@@ -129,9 +136,7 @@ export const createWalkMovement = ({
     }
 
     const heading = getHeading(from.coordinates, to.coordinates);
-    if (heading !== direction.get()) {
-      direction.set(heading);
-    }
+    setDirection(heading);
 
     const tweens = walkOrJump(from, to);
     return tweens;

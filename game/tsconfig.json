@@ -13,11 +13,22 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@battles/*": ["./src/battles/*"],
+      "@equipment/*": ["./src/equipment/*"],
+      "@equipment": ["./src/equipment"],
+      "@jobs/*": ["./src/jobs/*"],
+      "@jobs": ["./src/jobs"],
+      "@lib/*": ["./src/lib/*"],
+      "@modifiers/*": ["./src/modifiers/*"],
+      "@units/*": ["./src/units/*"],
+      "@units": ["./src/units"]
+    }
   },
   "include": ["src"],
   "references": [
-    { "path": "../tools/api" },
+    { "path": "../core" },
     { "path": "../tools/three-utils" },
     { "path": "../tools/ui" }
   ]

@@ -8,10 +8,14 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+coverage
 dist
 dist-ssr
-coverage
 *.local
+
+# model symlinks
+**/*/public/models
+!core/models
 
 # Sourcemaps
 tsconfig.tsbuildinfo

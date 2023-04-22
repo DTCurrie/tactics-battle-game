@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { bodyParser, create, defaults, router } from "json-server";
 import { nanoid } from "nanoid";
-import { LevelData } from "@tactics-battle-game/api";
+import { LevelData } from "@tactics-battle-game/core";
 
 type DB = {
   levels: LevelData[];

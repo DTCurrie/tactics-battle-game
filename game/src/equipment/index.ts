@@ -1,13 +1,21 @@
 import { ReadableAtom, atom, map, deepMap, action, MapStore } from "nanostores";
-import { BaseStatsData, baseStatTypes } from "../stats";
+import { BaseStatsData, baseStatTypes } from "../units/stats";
+import { Action } from "@battles/actions/action-types";
 
-export const weaponSlots = ["mainHand", "offHand"] as const;
+export const offhandSlot = "offHand" as const;
+export type OffhandSlot = typeof offhandSlot;
+
+export const weaponSlots = ["mainHand", offhandSlot] as const;
 export const weaponTypes = ["oneHanded", "twoHanded"] as const;
 export type WeaponSlot = (typeof weaponSlots)[number];
 export type WeaponType = (typeof weaponTypes)[number];
+export type WeaponAttackAction = Required<
+  Pick<Action, "power" | "range" | "target">
+>;
 export type WeaponProperties = {
-  slots: Partial<Record<WeaponSlot, boolean>>;
+  slot: WeaponSlot;
   type: WeaponType;
+  attack: WeaponAttackAction;
   dualWield?: boolean;
 };
 
@@ -34,6 +42,7 @@ export type Equipable = Readonly<{
   unequip: (stats: BaseStatsData) => BaseStatsData;
 };
 
+export type Offhand = Equipable & { slot: OffhandSlot };
 export type Weapon = Equipable & WeaponProperties;
 export type Armor = Equipable & { slot: ArmorSlot };
 export type Accessory = Equipable & { slot: AccessorySlot };
@@ -42,12 +51,24 @@ export type EquipableOptions = Pick<Equipable, "name"> & {
   stats: Partial<BaseStatsData>;
 };
 
+export type OffhandOptions = EquipableOptions & { slot: OffhandSlot };
 export type WeaponOptions = EquipableOptions & WeaponProperties;
 export type ArmorOptions = EquipableOptions & { slot: ArmorSlot };
 export type AccessoryOptions = EquipableOptions & { slot: AccessorySlot };
 
+export const Offhand = (item: Equipable) => {
+  if ((item as Offhand).slot === "offHand") {
+    return item as Offhand;
+  }
+
+  return false;
+};
+
 export const isWeapon = (item: Equipable) => {
-  if ((item as Weapon).slots.mainHand || (item as Weapon).slots.offHand) {
+  if (
+    (item as Weapon).slot === "mainHand" ||
+    (item as Weapon).slot === "offHand"
+  ) {
     return item as Weapon;
   }
 
@@ -129,18 +150,35 @@ export const createEquipable = ({
   };
 };
 
+export const createOffhand = ({
+  name,
+  stats,
+  slot,
+}: OffhandOptions): Offhand => {
+  const equipable = createEquipable({ name, stats });
+
+  return {
+    ...equipable,
+    slot,
+  };
+};
+
 export const createWeapon = ({
   name,
   stats,
-  slots,
+  slot,
   type,
+  attack,
+  dualWield = false,
 }: WeaponOptions): Weapon => {
   const equipable = createEquipable({ name, stats });
 
   return {
     ...equipable,
-    slots,
+    slot,
     type,
+    attack,
+    dualWield,
   };
 };
 
@@ -169,24 +207,25 @@ export const createAccessory = ({
 export type EquipmentSlots = Record<EquipmentSlot, Equipable | undefined>;
 export type EquipData = { stats: BaseStatsData; unequipped: Equipable[] };
 
-export type Equipment = Readonly<{
-  slots: ReadableAtom<EquipmentSlots>;
-}> & {
+export type Equipment = {
+  slots: () => EquipmentSlots;
   equip: (
     unitStats: BaseStatsData,
     item: Equipable,
     slot: EquipmentSlot
   ) => EquipData;
 
+  getWeapon: (slot: WeaponSlot) => Weapon | undefined;
   unequip: (unitStats: BaseStatsData, slot: EquipmentSlot) => EquipData;
 
-  getEquipable: (slot: EquipmentSlot) => Equipable | undefined;
+  debug: () => string;
 };
 
 export const createEquipment = (): Equipment => {
   const slots = deepMap<EquipmentSlots>();
 
-  const getEquipable = (slot: EquipmentSlot) => slots.get()[slot];
+  const getWeapon = (slot: WeaponSlot) =>
+    slots.get()[slot] as Weapon | undefined;
 
   const equip = action(
     slots,
@@ -279,10 +318,14 @@ export const createEquipment = (): Equipment => {
   );
 
   return {
-    slots,
+    slots: () => slots.get(),
 
     equip,
     unequip,
-    getEquipable,
+    getWeapon,
+
+    debug: () => JSON.stringify(slots.get(), undefined, 2),
   };
 };
+
+export * from "./equipment-data";

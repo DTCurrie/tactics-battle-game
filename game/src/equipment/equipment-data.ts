@@ -1,18 +1,46 @@
+import { createLineRange } from "@battles/actions/line-range";
 import {
   Armor,
   ArmorOptions,
+  Offhand,
+  OffhandOptions,
   Weapon,
   WeaponOptions,
   createArmor,
+  createOffhand,
   createWeapon,
 } from ".";
+import { createAreaRange } from "@battles/actions/area-range";
+import { createWeaponPower } from "@battles/actions/weapon-power";
+import { createWeaponTarget } from "@battles/actions/weapon-target";
+
+export const offhandData: Readonly<Record<string, OffhandOptions>> = {
+  shield: {
+    name: "Shield",
+    slot: "offHand",
+    stats: {
+      defense: 4,
+    },
+  },
+};
+
+export const createShield = (): Offhand => createOffhand(offhandData.shield);
+
+export const offhandFactories = {
+  shield: createShield,
+};
 
 export const weaponData: Readonly<Record<string, WeaponOptions>> = {
   dagger: {
     name: "Dagger",
-    slots: { mainHand: true, offHand: true },
+    slot: "mainHand",
     type: "oneHanded",
     dualWield: true,
+    attack: {
+      range: createLineRange(),
+      power: createWeaponPower(),
+      target: createWeaponTarget(),
+    },
     stats: {
       attack: 6,
     },
@@ -20,42 +48,41 @@ export const weaponData: Readonly<Record<string, WeaponOptions>> = {
 
   sword: {
     name: "Sword",
-    slots: { mainHand: true },
+    slot: "mainHand",
     type: "oneHanded",
+    attack: {
+      range: createLineRange(),
+      power: createWeaponPower(),
+      target: createWeaponTarget(),
+    },
     stats: {
       attack: 8,
     },
   },
 
-  shield: {
-    name: "Shield",
-    slots: { offHand: true },
-    type: "oneHanded",
-    stats: {
-      defense: 4,
-    },
-  },
-
   staff: {
     name: "Staff",
-    slots: { mainHand: true },
+    slot: "mainHand",
     type: "twoHanded",
+    attack: {
+      range: createAreaRange(2),
+      power: createWeaponPower(),
+      target: createWeaponTarget(),
+    },
     stats: {
-      attack: 4,
-      magicAttack: 8,
+      attack: 2,
+      arcana: 6,
     },
   },
 };
 
 export const createDagger = (): Weapon => createWeapon(weaponData.dagger);
 export const createSword = (): Weapon => createWeapon(weaponData.sword);
-export const createShield = (): Weapon => createWeapon(weaponData.shield);
 export const createStaff = (): Weapon => createWeapon(weaponData.staff);
 
 export const weaponFactories = {
   dagger: createDagger,
   sword: createSword,
-  shield: createShield,
   staff: createStaff,
 };
 
@@ -82,7 +109,7 @@ export const armorData: Readonly<Record<string, ArmorOptions>> = {
     slot: "body",
     stats: {
       defense: 2,
-      magicDefense: 4,
+      spirit: 4,
     },
   },
 
@@ -91,7 +118,7 @@ export const armorData: Readonly<Record<string, ArmorOptions>> = {
     slot: "head",
     stats: {
       defense: 2,
-      magicDefense: 2,
+      spirit: 2,
     },
   },
 
@@ -107,7 +134,7 @@ export const armorData: Readonly<Record<string, ArmorOptions>> = {
     name: "Straw Hat",
     slot: "head",
     stats: {
-      magicDefense: 4,
+      spirit: 4,
     },
   },
 };

@@ -3,8 +3,8 @@ export type StateMachine<Context> = {
 };
 
 export type State<Context = unknown> = {
-  onEnter?: (context: Context, previous?: State<Context>) => Context;
-  onExit?: (context: Context, next: State<Context>) => Context;
+  onEnter?: (context: Context, previous?: State<Context>) => Partial<Context>;
+  onExit?: (context: Context, next: State<Context>) => Partial<Context>;
 };
 
 export const createStateMachine = <Context>(
@@ -17,12 +17,13 @@ export const createStateMachine = <Context>(
   let state: { previous?: State<Context>; current?: State<Context> } = {};
 
   const transition = (next: State<Context>) => {
-    context = { ...(state.current?.onExit?.(context, next) ?? context) };
+    context = { ...context, ...state.current?.onExit?.(context, next) };
     state = { previous: state.current, current: next };
     setTimeout(
       () =>
         (context = {
-          ...(next.onEnter?.(context, state.previous) ?? context),
+          ...context,
+          ...next.onEnter?.(context, state.previous),
         }),
       0
     );

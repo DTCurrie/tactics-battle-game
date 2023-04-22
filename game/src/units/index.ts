@@ -1,14 +1,7 @@
 import { nanoid } from "nanoid";
+import { action, atom, map } from "nanostores";
 
-import { ReadableAtom, action, atom, map } from "nanostores";
-import { Job } from "./jobs";
-import {
-  BaseStatsData,
-  ExperienceStatsData,
-  StatType,
-  StatsData,
-  statTypes,
-} from "./stats";
+import { Job } from "../jobs";
 import {
   EquipData,
   Equipable,
@@ -18,25 +11,41 @@ import {
   isAccessory,
   isArmor,
   isWeapon,
-} from "./equipment";
+} from "../equipment";
 import { logger } from "../lib/logger";
+
+import {
+  BaseStatsData,
+  ExperienceStatsData,
+  StatType,
+  StatsData,
+  VariableStatType,
+  VariableStatsData,
+  variableStatTypes,
+} from "./stats";
 
 export type Unit = Readonly<{
   id: string;
   name: string;
   address: string;
-  baseStats: ReadableAtom<BaseStatsData>;
-  stats: ReadableAtom<StatsData>;
-  job: ReadableAtom<Job>;
-  equipment: ReadableAtom<Equipment>;
 }> & {
-  getStat: (type: StatType) => number;
+  baseStats: () => BaseStatsData;
+  stats: () => StatsData;
+  getStat: (type: StatType | VariableStatType) => number;
+
+  job: () => Job;
   setJob: (next: Job) => BaseStatsData;
+
+  equipment: () => Equipment;
   equip: (item: Equipable, slot: EquipmentSlot) => EquipData;
   unequip: (slot: EquipmentSlot) => EquipData;
+
   incrementCtr: () => number;
   reduceCtr: (cost: number) => number;
-  damage: (damage: number) => number;
+
+  adjustHealth: (by: number) => number;
+  adjustAbilityPoints: (points: number) => number;
+
   debug: () => string;
 };
 
@@ -64,13 +73,14 @@ export const createUnit = ({
 
   const baseStats = map<BaseStatsData>({
     maxHealthPoints: 1,
-    maxMagicPoints: 1,
+    maxAbilityPoints: 1,
     attack: 1,
     defense: 1,
-    magicAttack: 1,
-    magicDefense: 1,
+    arcana: 1,
+    spirit: 1,
     evade: 1,
     resist: 1,
+    accuracy: 1,
     speed: 1,
     move: 1,
     jump: 1,
@@ -78,12 +88,15 @@ export const createUnit = ({
   });
 
   const stats = map<StatsData>({
-    healthPoints: 1,
-    magicPoints: 1,
-    ctr: 0,
     ...initialStats,
     ...experienceStats.get(),
     ...baseStats.get(),
+  });
+
+  const variableStats = map<VariableStatsData>({
+    currentHealthPoints: 1,
+    currentAbilityPoints: 1,
+    turnCounter: 0,
   });
 
   const job = atom(initialJob);
@@ -100,7 +113,13 @@ export const createUnit = ({
     }
   );
 
-  const getStat = (type: StatType) => stats.get()[type];
+  const getStat = (type: StatType | VariableStatType) => {
+    if (variableStatTypes.includes(type as VariableStatType)) {
+      return variableStats.get()[type as VariableStatType];
+    }
+
+    return stats.get()[type as StatType];
+  };
 
   const setJob = action(job, "setJob", (store, next: Job) => {
     let stats = baseStats.get();
@@ -144,10 +163,10 @@ export const createUnit = ({
 
   const unequip = action(baseStats, "unequip", (store, slot: EquipmentSlot) => {
     let nextStats = store.get();
-    if (!equipment.get().slots.get()[slot]) {
+    if (!equipment.get().slots()[slot]) {
       logError("No item to equip", {
         slot,
-        equipment: equipment.get().slots.get(),
+        equipment: equipment.get().slots(),
       });
 
       return { stats: nextStats, unequipped: [] };
@@ -160,31 +179,62 @@ export const createUnit = ({
     return { stats: nextStats, unequipped };
   });
 
-  const incrementCtr = action(stats, "incrementCtr", (store) => {
-    const { ctr, speed } = stats.get();
-    let next = ctr;
+  const incrementCtr = action(variableStats, "incrementCtr", (store) => {
+    const { speed } = stats.get();
+    const { turnCounter } = store.get();
+    let next = turnCounter;
     next += speed;
-    store.setKey("ctr", next);
+    store.setKey("turnCounter", next);
     return next;
   });
 
-  const reduceCtr = action(stats, "reduceCtr", (store, cost: number) => {
-    const { ctr } = stats.get();
-    let next = ctr;
-    next -= cost;
-    store.setKey("ctr", next);
-    return next;
-  });
-
-  const damage = action(stats, "damage", (store, damage: number) => {
-    let next = store.get().healthPoints - damage;
-    if (next < 0) {
-      next = 0;
+  const reduceCtr = action(
+    variableStats,
+    "reduceCtr",
+    (store, cost: number) => {
+      const { turnCounter } = store.get();
+      let next = turnCounter;
+      next -= cost;
+      store.setKey("turnCounter", next);
+      return next;
     }
+  );
 
-    store.setKey("healthPoints", next);
-    return next;
-  });
+  const adjustHealth = action(
+    variableStats,
+    "adjustHealth",
+    (store, by: number) => {
+      let next = store.get().currentHealthPoints + by;
+      if (next < 0) {
+        next = 0;
+      }
+
+      if (next > stats.get()["maxHealthPoints"]) {
+        next = getStat("maxHealthPoints");
+      }
+
+      store.setKey("currentHealthPoints", next);
+      return next;
+    }
+  );
+
+  const adjustAbilityPoints = action(
+    variableStats,
+    "adjustAbilityPoints",
+    (store, by: number) => {
+      let next = store.get().currentAbilityPoints + by;
+      if (next < 0) {
+        next = 0;
+      }
+
+      if (next > getStat("maxAbilityPoints")) {
+        next = getStat("maxAbilityPoints");
+      }
+
+      store.setKey("currentAbilityPoints", next);
+      return next;
+    }
+  );
 
   setBaseStats(job.get().employ(baseStats.get()));
 
@@ -192,10 +242,10 @@ export const createUnit = ({
     id,
     name,
     address,
-    baseStats,
-    stats,
-    job,
-    equipment,
+    baseStats: () => baseStats.get(),
+    stats: () => stats.get(),
+    job: () => job.get(),
+    equipment: () => equipment.get(),
 
     getStat,
     setJob,
@@ -203,7 +253,8 @@ export const createUnit = ({
     unequip,
     incrementCtr,
     reduceCtr,
-    damage,
+    adjustHealth,
+    adjustAbilityPoints,
 
     debug: () =>
       JSON.stringify(
@@ -211,10 +262,17 @@ export const createUnit = ({
           id,
           name,
           address,
-          stats: statTypes,
+          stats: {
+            ...stats.get(),
+            ...variableStats.get(),
+          },
+          job: job.get().debug(),
+          equipment: equipment.get().debug(),
         },
         undefined,
         2
       ),
   };
 };
+
+export * from "./stats";

@@ -1,6 +1,6 @@
 # Tactics Battle Game
 
-A game inspired by Final Fantasy Tactics and Megaman Battle Network. Built with [three.js](https://threejs.org/) using [TypeScript](https://www.typescriptlang.org/).
+A tactical RPG  built with [three.js](https://threejs.org/) and [TypeScript](https://www.typescriptlang.org/).
 
 ## Requirements
 
@@ -46,13 +46,13 @@ This will start the `vite` development server and open the game in your browser 
 
 ### Running the Level Editor
 
-To run the game, first start the development server with:
+To run the level editor, first start the development server with:
 
 ```bash
 pnpm run level-editor
 ```
 
-This will start the `vite` development server and open the game in your browser window. From here, any of your changes should be automatically picked up and refreshed.
+This will start the `vite` development server and open the level editor in your browser window. From here, any of your changes should be automatically picked up and refreshed.
 
 ### Building the Game
 
@@ -69,10 +69,13 @@ This will generate the build artifacts and place them in the `dist` directory. _
 This project is a monorepo built on `pnpm` [workspaces](https://pnpm.io/workspaces). The following is a breakdown of the application architecture:
 
 - `.vscode`: VSCode IDE configuration
+- `core`: Core `game` logic: 
+  - Game settings
+  - Board logic
+  - APIs for  `game <-> server` communication
 - `game`: The rendering and game logic
 - `server`: The application logic
 - `tools`: A collection of tools and shared code
-  - `api`: API definitions for shared `game` logic and  `game <-> server` communication
   - `level-editor`: A tool for creating battle maps
   - `three-utils`: Common utilities for `three`
   - `ui`: UI elements

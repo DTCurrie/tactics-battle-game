@@ -1,32 +1,32 @@
-import { CapsuleGeometry, Color, Mesh, MeshToonMaterial } from "three";
 import {
-  Board,
+  CapsuleGeometry,
+  Color,
+  ConeGeometry,
+  Mesh,
+  MeshToonMaterial,
+  Vector2Tuple,
+  Vector3,
+} from "three";
+import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+
+import {
   LevelData,
   settings,
   createBoard,
-  listLevels,
   Tile,
-} from "@tactics-battle-game/api";
+} from "@tactics-battle-game/core";
 import { three } from "@tactics-battle-game/three-utils";
-import { BattleState, battleStateMachine } from "../battle-state-machine";
-import { createTurn, createTurnOrder } from "../turn-order";
+
+import { Actor, createActor } from "@battles/actor";
+import { BattleState, battleStateMachine } from "@battles/battle-state-machine";
+import { createEntity } from "@battles/entity";
+import { Faction, Factions } from "@battles/faction";
+import { createTurn, createTurnOrder } from "@battles/turn-order";
+import { armorFactories, offhandFactories, weaponFactories } from "@equipment";
+import { jobFactories } from "@jobs";
+import { createUnit } from "@units";
+
 import { createSelectUnitState } from "./select-unit";
-import { Actor, createActor } from "../actor";
-import { createPiece } from "../piece";
-import { createUnit } from "../../units/unit";
-import { jobFactories } from "../../units/jobs/jobs-data";
-import {
-  createCap,
-  createChainmail,
-  createDagger,
-  createHelm,
-  createLeatherTunic,
-  createRobe,
-  createShield,
-  createStaff,
-  createStrawHat,
-  createSword,
-} from "../../units/equipment/equipment-data";
 
 // DEBUG
 
@@ -44,22 +44,22 @@ const jobColor = (job: "rogue" | "warrior" | "wizard") => {
 const jobWeapons = (job: "rogue" | "warrior" | "wizard") => {
   switch (job) {
     case "rogue":
-      return [createDagger(), createDagger()];
+      return [weaponFactories.dagger(), weaponFactories.dagger()];
     case "warrior":
-      return [createSword(), createShield()];
+      return [weaponFactories.sword(), offhandFactories.shield()];
     case "wizard":
-      return [createStaff()];
+      return [weaponFactories.staff()];
   }
 };
 
 const jobArmor = (job: "rogue" | "warrior" | "wizard") => {
   switch (job) {
     case "rogue":
-      return [createLeatherTunic(), createCap()];
+      return [armorFactories.leatherTunic(), armorFactories.cap()];
     case "warrior":
-      return [createChainmail(), createHelm()];
+      return [armorFactories.chainmail(), armorFactories.helm()];
     case "wizard":
-      return [createRobe(), createStrawHat()];
+      return [armorFactories.robe(), armorFactories.strawHat()];
   }
 };
 
@@ -69,19 +69,32 @@ const jobs: Array<"rogue" | "warrior" | "wizard"> = [
   "wizard",
 ];
 
+const good: Faction = {
+  name: "Good Guys",
+  members: [],
+  allyFactions: [],
+  isPlayer: true,
+};
+
+const evil: Faction = { name: "Bad Guys", members: [], allyFactions: [] };
+
+const factions: Factions = {
+  good,
+  evil,
+};
+
 // END DEBUG
 
 const { scene, camera } = three();
 
-export const createInitBattleState = (): BattleState => {
-  const actors: Actor[] = [];
-  let level: LevelData;
-  let board: Board;
-
-  const spawnUnits = async () => {
-    const levels = await listLevels();
-    level = levels.sort(() => 0.5 - Math.random())[0];
-    board = createBoard(level);
+export const createInitBattleState = (
+  selectorGltf: GLTF,
+  levels: LevelData[]
+): BattleState => {
+  const initializeBoard = () => {
+    const level = levels.sort(() => 0.5 - Math.random())[0];
+    const board = createBoard(level, selectorGltf.scene);
+    const actors: Actor[] = [];
 
     for (const job of jobs) {
       const mesh = new Mesh(
@@ -91,6 +104,15 @@ export const createInitBattleState = (): BattleState => {
       mesh.castShadow = true;
       mesh.receiveShadow = true;
 
+      const pointer = new Mesh(
+        new ConeGeometry(0.25, 0.25),
+        new MeshToonMaterial({ color: jobColor(job) })
+      );
+
+      mesh.add(pointer);
+      pointer.position.y = 0.5;
+      pointer.position.z = 0.25;
+      pointer.rotation.setFromVector3(new Vector3(-5, 0, 0));
       const unit = createUnit({
         name: job,
         job: jobFactories[job](),
@@ -111,7 +133,7 @@ export const createInitBattleState = (): BattleState => {
       let tile: Tile | undefined = undefined;
       for (const [x, y, z] of level.tileData) {
         const candidate = board.getTile([x, z]);
-        if (y > 0 && candidate && !candidate.content()) {
+        if (y > 0 && candidate && !candidate.occupied()) {
           tile = candidate;
           break;
         }
@@ -121,17 +143,17 @@ export const createInitBattleState = (): BattleState => {
         throw new Error("No valid candidates for the actor's tile");
       }
 
-      const piece = createPiece({ mesh, tile });
+      const piece = createEntity({ mesh });
       piece.setPosition(tile.top());
-      piece.setTile(tile);
-      tile.setContent(piece);
+      tile.setOccupied(true);
 
       const actor = createActor({
         unit,
         piece,
       });
 
-      board.group.add(actor.mesh.get());
+      good.members.push(actor);
+      board.group.add(actor.object3d);
       actors.push(actor);
     }
 
@@ -144,27 +166,28 @@ export const createInitBattleState = (): BattleState => {
     camera().position.z = 10;
     camera().lookAt(board.group.position);
 
+    const turn = createTurn(board, actors[0]);
+    const round = createTurnOrder().round(actors, turn);
+
     battleStateMachine().transition(createSelectUnitState());
+
+    return {
+      board,
+      actors,
+      currentCoordinates: [0, 0] as Vector2Tuple,
+      factions,
+      turn: { ...turn, round },
+      getActorAtPosition: (position: Vector2Tuple) =>
+        actors.find((actor) => {
+          const actorPosition = actor.position();
+          return (
+            position[0] === actorPosition.x && position[1] === actorPosition.z
+          );
+        }),
+    };
   };
 
   return {
-    onEnter: (context) => {
-      spawnUnits();
-
-      return {
-        ...context,
-      };
-    },
-    onExit: (context) => {
-      const turn = createTurn(actors[0]);
-      const round = createTurnOrder().round(actors, turn);
-      return {
-        ...context,
-        actors: actors,
-        board,
-        currentCoordinates: [0, 0],
-        turn: { ...turn, round },
-      };
-    },
+    onEnter: () => ({ ...initializeBoard() }),
   };
 };

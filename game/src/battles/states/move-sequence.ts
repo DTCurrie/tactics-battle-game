@@ -9,7 +9,7 @@ export const createMoveSequenceState = (
   let current: PathfinderData | undefined = target;
 
   return {
-    onEnter: (context) => {
+    onEnter: () => {
       while (current !== undefined) {
         targets.unshift(current);
         current = current.previous;
@@ -17,7 +17,7 @@ export const createMoveSequenceState = (
 
       battleStateMachine().transition(createMoveStepState(targets, 1));
 
-      return context;
+      return {};
     },
   };
 };

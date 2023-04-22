@@ -8,9 +8,11 @@ export const createMoveStepState = (
   cursor: number
 ): BattleState => {
   return {
-    onEnter: (context) => {
-      const movement = createWalkMovement(context.turn.actor.get());
+    onEnter: ({ board, turn }) => {
+      const actor = turn.actor();
+      const movement = createWalkMovement(actor);
       const tweens = movement.move(targets[cursor]);
+
       tweens[0].onComplete(() => {
         const next = cursor + 1;
         if (cursor < targets.length - 1) {
@@ -23,14 +25,14 @@ export const createMoveStepState = (
           throw new Error("Invalid target in pathfinding", { cause: target });
         }
 
-        context.turn.actor.get().tile.get().setContent(undefined);
-        context.turn.actor.get().setTile(target.tile);
-        context.turn.moved.set(true);
+        const tile = board.getTile(actor.coordinates());
+        tile.setOccupied(true);
+        turn.setMoved(true);
 
         battleStateMachine().transition(createCommandSelectionState());
       });
 
-      return { ...context };
+      return {};
     },
   };
 };

@@ -3,7 +3,7 @@ import {
   GrowthStatsData,
   baseStatTypes,
   growthStatTypes,
-} from "../stats";
+} from "../units";
 
 export type Job = Readonly<{
   name: string;
@@ -11,6 +11,8 @@ export type Job = Readonly<{
   employ: (stats: BaseStatsData) => BaseStatsData;
   unemploy: (stats: BaseStatsData) => BaseStatsData;
   levelUp: (stats: BaseStatsData) => BaseStatsData;
+
+  debug: () => string;
 };
 
 export type JobOptions = {
@@ -64,5 +66,18 @@ export const createJob = ({ name, stats, growth }: JobOptions): Job => {
     employ,
     unemploy,
     levelUp,
+
+    debug: () =>
+      JSON.stringify(
+        {
+          name,
+          stats,
+          growth,
+        },
+        undefined,
+        2
+      ),
   };
 };
+
+export * from "./jobs-data";

@@ -1,11 +1,11 @@
 {
   "name": "@tactics-battle-game/monorepo",
   "version": "0.0.0",
-  "description": "A game inspired by Final Fantasy Tactics and Megaman Battle Network.",
+  "description": "A tactical RPG  built with three.js and TypeScript.",
   "scripts": {
     "dev": "pnpm -r --parallel --filter='./game' --filter='./server' run dev",
     "level-editor": "pnpm -r --parallel --filter='./tools/level-editor' --filter='./server' run dev",
-    "build": "pnpm -r --parallel --filter='./game' --filter='./server' --filter='./tools/*' run build"
+    "build": "pnpm -r --parallel --filter='./game' --filter='./server' run build"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.57.0",

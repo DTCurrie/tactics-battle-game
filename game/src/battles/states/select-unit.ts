@@ -6,16 +6,18 @@ import {
 import { createCommandSelectionState } from "./command-selection";
 
 export const createSelectUnitState = (): BattleState => {
-  function changeCurrentUnit(context: BattleContext) {
-    context.turn.round.next();
-    context.board.moveSelector(context.turn.actor.get().tile.get().position());
+  function changeCurrentUnit({ board, turn }: BattleContext) {
+    const position = turn.actor().position();
+    turn.round.next();
+    board.getTile([position.x, position.z]).setOccupied(true);
+    board.moveSelector([position.x, position.z]);
     battleStateMachine().transition(createCommandSelectionState());
   }
 
   return {
     onEnter: (context) => {
       changeCurrentUnit(context);
-      return { ...context };
+      return {};
     },
   };
 };

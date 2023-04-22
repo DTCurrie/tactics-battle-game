@@ -3,7 +3,7 @@ import {
   settings,
   Tile,
   normalizedDirections,
-} from "@tactics-battle-game/api";
+} from "@tactics-battle-game/core";
 import { Vector2Tuple } from "three";
 import { createQueue } from "../lib/queue";
 import { ReadableAtom, action, atom } from "nanostores";
@@ -21,7 +21,7 @@ export const filterPath = (paths: PathfinderData[]) => {
   const filtered = [];
 
   for (const path of paths) {
-    if (path.tile?.content() === undefined) {
+    if (!path.tile.occupied()) {
       filtered.push(path);
     }
   }
@@ -36,34 +36,35 @@ export type Pathfinder = Readonly<{
   getPathsInRange: (start: PathfinderData) => PathfinderData[];
 };
 
+export const createPathfinderMap = (board: Board) => {
+  const map: PathfinderData[][] = Array.from(
+    { length: settings.board.width },
+    () => Array.from({ length: settings.board.depth })
+  );
+
+  for (let x = 0; x < settings.board.width; x++) {
+    for (let y = 0; y < settings.board.depth; y++) {
+      const coordinates: Vector2Tuple = [x, y];
+
+      map[x][y] = {
+        coordinates,
+        cost: Number.MAX_SAFE_INTEGER,
+        tile: board.getTile(coordinates),
+      };
+    }
+  }
+
+  return map;
+};
+
 export const createPathfinder = (
   board: Board,
   expandSearch: (from: PathfinderData, to: PathfinderData) => boolean
 ): Pathfinder => {
-  const paths = atom<PathfinderData[][]>(
-    Array.from({ length: settings.board.width }, () =>
-      Array.from({ length: settings.board.depth })
-    )
-  );
+  const paths = atom<PathfinderData[][]>(createPathfinderMap(board));
 
   const reset = action(paths, "reset", (store) => {
-    const next: PathfinderData[][] = Array.from(
-      { length: settings.board.width },
-      () => Array.from({ length: settings.board.depth })
-    );
-
-    for (let x = 0; x < settings.board.width; x++) {
-      for (let y = 0; y < settings.board.depth; y++) {
-        const coordinates: Vector2Tuple = [x, y];
-
-        next[x][y] = {
-          coordinates,
-          cost: Number.MAX_SAFE_INTEGER,
-          tile: board.getTile(coordinates),
-        };
-      }
-    }
-
+    const next = createPathfinderMap(board);
     store.set(next);
   });
 
@@ -121,8 +122,6 @@ export const createPathfinder = (
 
   const getPathsInRange = (start: PathfinderData) =>
     filterPath(rangeSearch(start, expandSearch));
-
-  reset();
 
   return {
     paths,

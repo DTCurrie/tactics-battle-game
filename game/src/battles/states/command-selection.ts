@@ -1,18 +1,14 @@
-import { BattleState } from "../battle-state-machine";
+import { BattleState } from "@battles/battle-state-machine";
 import { createCommandSelectionUi } from "./command-selection-ui";
 
 export const createCommandSelectionState = (): BattleState => {
-  let cleanup: () => void;
-
   return {
-    onEnter: (context) => {
-      const { dispose } = createCommandSelectionUi(context);
-      cleanup = dispose;
-      return { ...context };
+    onEnter: ({ board, turn }) => {
+      return { ui: createCommandSelectionUi({ board, turn }) };
     },
-    onExit: (context) => {
-      cleanup();
-      return { ...context };
+    onExit: ({ ui }) => {
+      ui.dispose();
+      return {};
     },
   };
 };

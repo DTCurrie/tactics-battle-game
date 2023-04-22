@@ -3,7 +3,7 @@ import { button, buttons } from "@tactics-battle-game/ui";
 import { three, updatesSystem } from "@tactics-battle-game/three-utils";
 import { battleStateMachine } from "../battle-state-machine";
 import { createCommandSelectionState } from "./command-selection";
-import { Board } from "@tactics-battle-game/api";
+import { Board, settings } from "@tactics-battle-game/core";
 import { createMoveSequenceState } from "./move-sequence";
 import { Pathfinder } from "../pathfinder";
 
@@ -13,6 +13,7 @@ const { addUpdate, removeUpdate } = updatesSystem();
 export const createMoveTargetUi = (board: Board, pathfinder: Pathfinder) => {
   const pointer = new Vector2();
   const raycaster = new Raycaster();
+  raycaster.layers.set(settings.layers.tile);
 
   const btns = buttons([
     button("Cancel", () =>
@@ -29,7 +30,7 @@ export const createMoveTargetUi = (board: Board, pathfinder: Pathfinder) => {
     event.preventDefault();
 
     raycaster.setFromCamera(pointer, camera());
-    const intersects = raycaster.intersectObjects(board.group.children);
+    const intersects = raycaster.intersectObjects(board.group.children, false);
     if (!intersects.length) {
       return;
     }
@@ -41,7 +42,7 @@ export const createMoveTargetUi = (board: Board, pathfinder: Pathfinder) => {
 
     const tile = board.getTile([x, y]);
 
-    if (!tile || !tile.selected()) {
+    if (!tile || !tile.marked()) {
       return;
     }
 

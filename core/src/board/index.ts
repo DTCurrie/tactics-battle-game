@@ -2,17 +2,17 @@ import {
   Group,
   Mesh,
   BoxGeometry,
-  MeshBasicMaterial,
+  MeshToonMaterial,
   Vector2Tuple,
   Vector3,
 } from "three";
-import { settings } from "./settings";
-import { Level } from "./level-api";
-import { Tile, createTile } from "./tile";
+import { settings } from "../settings";
+import { Level } from "../api/level-api";
+import { Tile, createTile, createTileMesh, markerColors } from "./tile";
 
 export type Board = Readonly<{
   group: Group;
-  selector: Mesh<BoxGeometry, MeshBasicMaterial>;
+  selector: Group;
   grid: Tile[][];
   level: Level;
 }> & {
@@ -21,13 +21,8 @@ export type Board = Readonly<{
   moveSelector: ([x, y]: Vector2Tuple) => void;
 };
 
-export const createBoard = (level: Level): Board => {
+export const createBoard = (level: Level, selector: Group): Board => {
   const group = new Group();
-
-  const selector = new Mesh(
-    new BoxGeometry(1, 0.1, 1),
-    new MeshBasicMaterial({ color: "yellow", opacity: 0.5, transparent: true })
-  );
 
   const grid: Tile[][] = Array.from({ length: settings.board.width }, () =>
     Array.from({ length: settings.board.depth })
@@ -43,16 +38,27 @@ export const createBoard = (level: Level): Board => {
       : selector.position.set(x, 0.05, y);
   };
 
+  selector.traverse((obj) => {
+    if (obj instanceof Mesh) {
+      obj.material = new MeshToonMaterial({
+        color: markerColors.selected,
+        opacity: 0.75,
+        transparent: true,
+      });
+    }
+  });
+
+  selector.scale.set(0.5, 0.5, 0.5);
+  moveSelector([0, 0]);
   group.add(selector);
-  selector.position.y = 0.05;
   group.position.set(0, 0, 0);
 
   for (let x = 0; x < settings.board.width; x++) {
     for (let y = 0; y < settings.board.depth; y++) {
       const gridSquare = new Mesh(
         new BoxGeometry(0.9, settings.stepHeight, 0.9),
-        new MeshBasicMaterial({
-          color: "gray",
+        new MeshToonMaterial({
+          color: "ghostwhite",
           opacity: 0.25,
           transparent: true,
         })
@@ -64,10 +70,10 @@ export const createBoard = (level: Level): Board => {
   }
 
   for (const [x, y, z] of level.tileData) {
-    const tile = createTile({});
-    tile.setHeight(y);
+    const tile = createTile({ mesh: createTileMesh(y, "forestgreen") });
     grid[x][z] = tile;
     getTile([x, z])?.setPosition([x, z]);
+    tile.setHeight(y);
     group.add(tile.mesh);
   }
 
@@ -81,3 +87,6 @@ export const createBoard = (level: Level): Board => {
     moveSelector,
   };
 };
+
+export * from "./direction";
+export * from "./tile";

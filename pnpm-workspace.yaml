@@ -1,4 +1,5 @@
 packages:
+  - "core"
   - "game"
   - "server"
   - "tools/*"

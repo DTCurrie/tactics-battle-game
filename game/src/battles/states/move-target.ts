@@ -4,55 +4,53 @@ import { createMoveTargetUi } from "./move-target-ui";
 
 export const createMoveTargetState = (): BattleState => {
   let paths: PathfinderData[] = [];
-  let cleanup: () => void;
 
   return {
-    onEnter: (context) => {
-      const start = context.turn.actor.get().tile.get().position();
+    onEnter: ({ board, turn }) => {
+      const actor = turn.actor();
+      const start = actor.position();
 
       const expandSearch = (from: PathfinderData, to: PathfinderData) => {
         if (!to.tile || !from.tile) {
           return false;
         }
 
-        if (to.tile.content() !== undefined) {
+        if (to.tile.occupied()) {
           return false;
         }
 
         const fromHeight = from.tile.height();
         const toHeight = to.tile.height();
         const heightAbs = Math.abs(fromHeight - toHeight);
-        const jumpHeight = context.turn.actor.get().getStat("jump");
+        const jumpHeight = actor.getStat("jump");
         if (heightAbs > jumpHeight) {
           return false;
         }
 
-        const move = context.turn.actor.get().getStat("move");
+        const move = actor.getStat("move");
         return simpleSearch(move, from.cost);
       };
 
-      const pathfinder = createPathfinder(context.board, expandSearch);
-      const { dispose } = createMoveTargetUi(context.board, pathfinder);
+      const pathfinder = createPathfinder(board, expandSearch);
 
       paths = pathfinder.getPathsInRange(
-        pathfinder.paths.get()[start[0]][start[1]]
+        pathfinder.paths.get()[start.x][start.z]
       );
-      cleanup = dispose;
 
       for (const path of paths) {
-        path.tile?.setSelected(true);
+        path.tile.setMarked("move");
       }
 
-      return { ...context };
+      return { ui: createMoveTargetUi(board, pathfinder) };
     },
-    onExit: (context) => {
+    onExit: ({ ui }) => {
       for (const path of paths) {
-        path.tile?.setSelected(false);
+        path.tile.setMarked();
       }
 
-      cleanup();
+      ui.dispose();
 
-      return { ...context };
+      return { ui: undefined };
     },
   };
 };

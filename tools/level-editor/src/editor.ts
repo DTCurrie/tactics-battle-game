@@ -3,8 +3,9 @@ import {
   Tile,
   createBoard,
   createTile,
+  createTileMesh,
   settings,
-} from "@tactics-battle-game/api";
+} from "@tactics-battle-game/core";
 import { three } from "@tactics-battle-game/three-utils";
 
 type Rect = {
@@ -25,18 +26,15 @@ export type LevelEditor = {
   getTileData: () => Vector3Tuple[];
 };
 
-const createLevelEditor = (): LevelEditor => {
-  const {
-    group,
-    grid,
-    getTile,
-    setTile,
-    moveSelector: updateSelector,
-  } = createBoard({
-    id: "",
-    name: "",
-    tileData: [],
-  });
+const createLevelEditor = (selector: Group): LevelEditor => {
+  const { group, grid, getTile, setTile, moveSelector } = createBoard(
+    {
+      id: "",
+      name: "",
+      tileData: [],
+    },
+    selector
+  );
 
   let currentCoordinates: Vector2Tuple = [0, 0];
 
@@ -45,7 +43,7 @@ const createLevelEditor = (): LevelEditor => {
       return getTile([x, y]) as Tile;
     }
 
-    const tile = createTile({});
+    const tile = createTile({ mesh: createTileMesh(0, "forestgreen") });
     tile.setPosition([x, y]);
     group.add(tile.mesh);
     setTile([x, y], tile);
@@ -110,7 +108,7 @@ const createLevelEditor = (): LevelEditor => {
 
   const setSelector = ([x, y]: Vector2Tuple) => {
     currentCoordinates = [x, y];
-    updateSelector([x, y]);
+    moveSelector([x, y]);
   };
 
   const getTileData = (): Vector3Tuple[] => {
@@ -150,11 +148,11 @@ const createLevelEditor = (): LevelEditor => {
 };
 
 let instance: LevelEditor | null = null;
-export const levelEditor = () => {
+export const levelEditor = (selector: Group) => {
   if (instance !== null) {
     return instance;
   }
 
-  instance = createLevelEditor();
+  instance = createLevelEditor(selector);
   return instance;
 };

@@ -1,8 +1,11 @@
-import { Piece } from "./piece";
-import { Unit } from "../units/unit";
+import { Unit } from "@units";
+import { Entity } from "./entity";
 
-export type Actor = Unit & Piece;
-export type ActorOptions = { unit: Unit; piece: Piece };
+export type Actor = Unit & Entity;
+export type ActorOptions = {
+  unit: Unit;
+  piece: Entity;
+};
 
 export const createActor = ({ unit, piece }: ActorOptions): Actor => {
   return {

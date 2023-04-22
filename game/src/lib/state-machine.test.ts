@@ -8,6 +8,8 @@ describe("state-machine", () => {
   };
 
   test(".transition()", () => {
+    vi.useFakeTimers();
+
     const stateMachine = createStateMachine<TestContext>({
       count: 0,
       finished: false,
@@ -55,10 +57,10 @@ describe("state-machine", () => {
       },
     });
 
-    setTimeout(() => {
-      expect(spies.first).toHaveBeenCalled();
-      expect(spies.second).toHaveBeenCalled();
-      expect(spies.third).toHaveBeenCalled();
-    }, 0);
+    vi.runAllTimers();
+
+    expect(spies.first).toHaveBeenCalled();
+    expect(spies.second).toHaveBeenCalled();
+    expect(spies.third).toHaveBeenCalled();
   });
 });

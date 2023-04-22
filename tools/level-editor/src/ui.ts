@@ -1,6 +1,6 @@
 import { Vector2, WebGLRenderer } from "three";
 import { nanoid } from "nanoid";
-import { settings, createLevel } from "@tactics-battle-game/api";
+import { settings, createLevel } from "@tactics-battle-game/core";
 import { button, buttons } from "@tactics-battle-game/ui";
 import { LevelEditor } from "./editor";
 

@@ -1,64 +1,93 @@
-import { Direction, Tile } from "@tactics-battle-game/api";
+import { Board, Direction } from "@tactics-battle-game/core";
 import { Actor } from "./actor";
-import { ReadableAtom, WritableAtom, action, atom } from "nanostores";
+import { action, atom } from "nanostores";
+import { Vector2Tuple } from "three";
 
 const activationCost = 100;
 const turnCost = 50;
 const moveCost = 30;
 const actionCost = 20;
 
-export type Turn = Readonly<{
-  actor: ReadableAtom<Actor>;
-  moved: WritableAtom<boolean>;
-  acted: WritableAtom<boolean>;
-  moveLocked: WritableAtom<boolean>;
-  ability: WritableAtom<unknown>;
-  targets: WritableAtom<Tile[]>;
-}> & {
-  setActor: (next: Actor) => void;
+export type Turn = {
+  actor: () => Actor;
+  setActor: (next: Actor) => Actor;
+
+  moved: () => boolean;
+  addMovedListener: (listener: (value: boolean) => void) => void;
+  setMoved: (next: boolean) => boolean;
+
+  acted: () => boolean;
+  setActed: (next: boolean) => boolean;
+
+  moveLocked: () => boolean;
+  setMoveLocked: (next: boolean) => boolean;
+
   undoMove: () => void;
 };
 
-export const createTurn = (first: Actor): Turn => {
+export const createTurn = (board: Board, first: Actor): Turn => {
   const actor = atom<Actor>(first);
 
-  const startTile = atom<Tile>(first.tile.get());
-  const startDirection = atom<Direction>(first.direction.get());
+  const startPosition = atom<Vector2Tuple>([
+    first.position().x,
+    first.position().z,
+  ]);
+
+  const startDirection = atom<Direction>(first.direction());
 
   const moved = atom(false);
   const acted = atom(false);
   const moveLocked = atom(false);
 
-  const ability = atom<unknown | undefined>(undefined);
-  const targets = atom<Tile[]>([]);
-
   const setActor = action(actor, "setActor", (store, next: Actor) => {
     moved.set(false);
     acted.set(false);
     moveLocked.set(false);
-    startTile.set(next.tile.get());
-    startDirection.set(next.direction.get());
+    startPosition.set([next.position().x, next.position().z]);
+    startDirection.set(next.direction());
     store.set(next);
+    return next;
   });
 
   const undoMove = action(moved, "undoMove", (store) => {
-    actor.get().setPosition(startTile.get().top());
-    actor.get().direction.set(startDirection.get());
-    actor.get().tile.get().setContent(undefined);
-    actor.get().setTile(startTile.get());
-    startTile.get().setContent(actor.get());
+    const current = board.getTile(actor.get().coordinates());
+    const start = board.getTile(startPosition.get());
+
+    actor.get().setPosition(start.top());
+    actor.get().setDirection(startDirection.get());
+    current.setOccupied(false);
+    start.setOccupied(true);
     store.set(false);
   });
 
   return {
-    actor,
-    moved,
-    acted,
-    moveLocked,
-    ability,
-    targets,
-
+    actor: () => actor.get(),
     setActor,
+
+    moved: () => moved.get(),
+    addMovedListener: (listener: (value: boolean) => void) =>
+      moved.listen(listener),
+    setMoved: action(moved, "setMoved", (store, next: boolean) => {
+      store.set(next);
+      return next;
+    }),
+
+    acted: () => acted.get(),
+    setActed: action(acted, "setActed", (store, next: boolean) => {
+      store.set(next);
+      return next;
+    }),
+
+    moveLocked: () => moveLocked.get(),
+    setMoveLocked: action(
+      moveLocked,
+      "setMoveLocked",
+      (store, next: boolean) => {
+        store.set(next);
+        return next;
+      }
+    ),
+
     undoMove,
   };
 };
@@ -69,7 +98,7 @@ export type TurnOrder = {
 
 export const createTurnOrder = () => {
   const canTakeTurn = ({ getStat }: Actor) => {
-    return getStat("ctr") >= activationCost;
+    return getStat("turnCounter") >= activationCost;
   };
 
   function* round(actors: Actor[], data: Turn) {
@@ -80,7 +109,7 @@ export const createTurnOrder = () => {
 
       const sortedUnits = [
         ...actors.sort((a, b) =>
-          a.getStat("ctr") >= b.getStat("ctr") ? 1 : -1
+          a.getStat("turnCounter") >= b.getStat("turnCounter") ? 1 : -1
         ),
       ];
 
@@ -91,11 +120,11 @@ export const createTurnOrder = () => {
 
           let cost = 0 + turnCost;
 
-          if (data.moved) {
+          if (data.moved()) {
             cost += moveCost;
           }
 
-          if (data.acted) {
+          if (data.acted()) {
             cost += actionCost;
           }
 
