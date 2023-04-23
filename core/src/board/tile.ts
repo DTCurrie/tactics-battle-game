@@ -6,20 +6,20 @@ import {
   Vector2Tuple,
   Vector3,
 } from "three";
-import { settings } from "../settings";
+import { IGNORE_LAYER, STEP_HEIGHT, TILE_LAYER } from "../settings";
 
 export type TileMesh = Mesh<BoxGeometry, MeshToonMaterial>;
 
-export type MarkerColor = "selected" | "move" | "attack" | "support";
+export type MarkerColor = "selected" | "movement" | "offense" | "support";
 export const markerColors: Record<MarkerColor, ColorRepresentation> = {
   selected: "ghostwhite",
-  move: "dodgerblue",
-  attack: "tomato",
+  movement: "dodgerblue",
+  offense: "tomato",
   support: "limegreen",
 };
 
 export const createTileGeometry = (height: number) =>
-  new BoxGeometry(1, settings.stepHeight * height, 1);
+  new BoxGeometry(1, STEP_HEIGHT * height, 1);
 
 export const createTileMaterial = (color: ColorRepresentation) =>
   new MeshToonMaterial({ color });
@@ -98,7 +98,7 @@ export const createTile = ({ mesh }: TileOptions): Tile => {
     return next;
   };
 
-  marker.layers.set(settings.layers.ignore);
+  marker.layers.set(IGNORE_LAYER);
   marker.visible = false;
   marker.position.set(
     mesh.position.x,
@@ -108,7 +108,7 @@ export const createTile = ({ mesh }: TileOptions): Tile => {
 
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-  mesh.layers.set(settings.layers.tile);
+  mesh.layers.set(TILE_LAYER);
   mesh.add(marker);
 
   return {

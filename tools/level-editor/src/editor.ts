@@ -51,16 +51,12 @@ const createLevelEditor = (selector: Group): LevelEditor => {
   };
 
   const randomRect = (): Rect => {
-    const x = Math.floor(Math.random() * settings.board.width);
-    const y = Math.floor(Math.random() * settings.board.depth);
+    const x = Math.floor(Math.random() * BOARD_WIDTH);
+    const y = Math.floor(Math.random() * BOARD_DEPTH);
 
-    const width = Math.floor(
-      Math.floor(Math.random() * (settings.board.width - x)) + 1
-    );
+    const width = Math.floor(Math.floor(Math.random() * (BOARD_WIDTH - x)) + 1);
 
-    const depth = Math.floor(
-      Math.floor(Math.random() * (settings.board.depth - y)) + 1
-    );
+    const depth = Math.floor(Math.floor(Math.random() * (BOARD_DEPTH - y)) + 1);
 
     return { x, y, width, depth };
   };
@@ -68,9 +64,9 @@ const createLevelEditor = (selector: Group): LevelEditor => {
   const adjustSingle = ([x, y]: Vector2Tuple, height: number) => {
     if (height > 0) {
       const tile = getOrCreateTile([x, y]);
-      if (tile.height() < settings.board.height) {
-        if (tile.height() > settings.board.height) {
-          tile.setHeight(settings.board.height - tile.height());
+      if (tile.height() < BOARD_HEIGHT) {
+        if (tile.height() > BOARD_HEIGHT) {
+          tile.setHeight(BOARD_HEIGHT - tile.height());
           return;
         }
 
@@ -132,7 +128,7 @@ const createLevelEditor = (selector: Group): LevelEditor => {
   scene.background = new Color(0xffffff);
   scene.add(group);
 
-  camera().position.y = settings.board.width / 2;
+  camera().position.y = BOARD_WIDTH / 2;
   camera().position.y = 10;
   camera().position.z = 10;
   camera().lookAt(group.position);

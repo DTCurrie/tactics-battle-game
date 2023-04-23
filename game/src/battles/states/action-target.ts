@@ -5,7 +5,7 @@ import { createActionTargetUi } from "./action-target-ui";
 
 export const createActionTargetState = (
   action: Action,
-  type: Extract<MarkerColor, "attack" | "support">
+  type: Extract<MarkerColor, "offense" | "support">
 ): BattleState => {
   return {
     onEnter: ({ board, turn }) => {

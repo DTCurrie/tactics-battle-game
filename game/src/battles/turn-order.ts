@@ -2,6 +2,7 @@ import { Board, Direction } from "@tactics-battle-game/core";
 import { Actor } from "./actor";
 import { action, atom } from "nanostores";
 import { Vector2Tuple } from "three";
+import { TURN_COUNTER } from "@units/stats";
 
 const activationCost = 100;
 const turnCost = 50;
@@ -65,8 +66,10 @@ export const createTurn = (board: Board, first: Actor): Turn => {
     setActor,
 
     moved: () => moved.get(),
+
     addMovedListener: (listener: (value: boolean) => void) =>
       moved.listen(listener),
+
     setMoved: action(moved, "setMoved", (store, next: boolean) => {
       store.set(next);
       return next;
@@ -98,7 +101,7 @@ export type TurnOrder = {
 
 export const createTurnOrder = () => {
   const canTakeTurn = ({ getStat }: Actor) => {
-    return getStat("turnCounter") >= activationCost;
+    return getStat(TURN_COUNTER) >= activationCost;
   };
 
   function* round(actors: Actor[], data: Turn) {
@@ -109,7 +112,7 @@ export const createTurnOrder = () => {
 
       const sortedUnits = [
         ...actors.sort((a, b) =>
-          a.getStat("turnCounter") >= b.getStat("turnCounter") ? 1 : -1
+          a.getStat(TURN_COUNTER) >= b.getStat(TURN_COUNTER) ? 1 : -1
         ),
       ];
 

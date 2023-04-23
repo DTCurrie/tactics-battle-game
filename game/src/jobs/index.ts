@@ -1,12 +1,14 @@
 import {
   BaseStatsData,
   GrowthStatsData,
-  baseStatTypes,
-  growthStatTypes,
+  BASE_STATS,
+  GROWTH_STATS,
 } from "../units";
 
 export type Job = Readonly<{
   name: string;
+  stats: Readonly<BaseStatsData>;
+  growth: Readonly<GrowthStatsData>;
 }> & {
   employ: (stats: BaseStatsData) => BaseStatsData;
   unemploy: (stats: BaseStatsData) => BaseStatsData;
@@ -15,17 +17,13 @@ export type Job = Readonly<{
   debug: () => string;
 };
 
-export type JobOptions = {
-  name: string;
-  stats: BaseStatsData;
-  growth: GrowthStatsData;
-};
+export type JobOptions = Pick<Job, "name" | "stats" | "growth">;
 
 export const createJob = ({ name, stats, growth }: JobOptions): Job => {
   const levelUp = (unitStats: BaseStatsData): BaseStatsData => {
     const next: BaseStatsData = { ...unitStats };
-    for (const stat of growthStatTypes) {
-      let value = next[stat];
+    for (const stat of GROWTH_STATS) {
+      let value = next[stat] + 1;
 
       if (Math.random() > 1 - growth[stat]) {
         value++;
@@ -40,7 +38,7 @@ export const createJob = ({ name, stats, growth }: JobOptions): Job => {
   const employ = (unitStats: BaseStatsData) => {
     const next: BaseStatsData = { ...unitStats };
 
-    for (const stat of baseStatTypes) {
+    for (const stat of BASE_STATS) {
       let value = next[stat];
       value += stats[stat];
       next[stat] = value;
@@ -52,7 +50,7 @@ export const createJob = ({ name, stats, growth }: JobOptions): Job => {
   const unemploy = (unitStats: BaseStatsData) => {
     const next: BaseStatsData = { ...unitStats };
 
-    for (const stat of baseStatTypes) {
+    for (const stat of BASE_STATS) {
       let value = next[stat];
       value -= stats[stat];
       next[stat] = value;
@@ -63,6 +61,8 @@ export const createJob = ({ name, stats, growth }: JobOptions): Job => {
 
   return {
     name,
+    stats,
+    growth,
     employ,
     unemploy,
     levelUp,

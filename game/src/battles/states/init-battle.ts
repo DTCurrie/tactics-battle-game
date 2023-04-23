@@ -11,9 +11,9 @@ import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 
 import {
   LevelData,
-  settings,
   createBoard,
   Tile,
+  BOARD_WIDTH,
 } from "@tactics-battle-game/core";
 import { three } from "@tactics-battle-game/three-utils";
 
@@ -22,8 +22,16 @@ import { BattleState, battleStateMachine } from "@battles/battle-state-machine";
 import { createEntity } from "@battles/entity";
 import { Faction, Factions } from "@battles/faction";
 import { createTurn, createTurnOrder } from "@battles/turn-order";
-import { armorFactories, offhandFactories, weaponFactories } from "@equipment";
-import { jobFactories } from "@jobs";
+import {
+  BODY_SLOT,
+  HEAD_SLOT,
+  MAIN_HAND_SLOT,
+  OFF_HAND_SLOT,
+  ARMOR_FACTORIES,
+  OFF_HAND_FACTORIES,
+  WEAPON_FACTORIES,
+} from "@equipment";
+import { JOB_FACTORIES } from "@jobs";
 import { createUnit } from "@units";
 
 import { createSelectUnitState } from "./select-unit";
@@ -44,22 +52,22 @@ const jobColor = (job: "rogue" | "warrior" | "wizard") => {
 const jobWeapons = (job: "rogue" | "warrior" | "wizard") => {
   switch (job) {
     case "rogue":
-      return [weaponFactories.dagger(), weaponFactories.dagger()];
+      return [WEAPON_FACTORIES.dagger(), WEAPON_FACTORIES.dagger()];
     case "warrior":
-      return [weaponFactories.sword(), offhandFactories.shield()];
+      return [WEAPON_FACTORIES.sword(), OFF_HAND_FACTORIES.shield()];
     case "wizard":
-      return [weaponFactories.staff()];
+      return [WEAPON_FACTORIES.staff()];
   }
 };
 
 const jobArmor = (job: "rogue" | "warrior" | "wizard") => {
   switch (job) {
     case "rogue":
-      return [armorFactories.leatherTunic(), armorFactories.cap()];
+      return [ARMOR_FACTORIES.tunic(), ARMOR_FACTORIES.cap()];
     case "warrior":
-      return [armorFactories.chainmail(), armorFactories.helm()];
+      return [ARMOR_FACTORIES.chainmail(), ARMOR_FACTORIES.helm()];
     case "wizard":
-      return [armorFactories.robe(), armorFactories.strawHat()];
+      return [ARMOR_FACTORIES.robe(), ARMOR_FACTORIES.strawHat()];
   }
 };
 
@@ -115,19 +123,19 @@ export const createInitBattleState = (
       pointer.rotation.setFromVector3(new Vector3(-5, 0, 0));
       const unit = createUnit({
         name: job,
-        job: jobFactories[job](),
+        job: JOB_FACTORIES[job](),
       });
 
       const weapons = jobWeapons(job);
       for (let i = 0; i < weapons.length; i++) {
         const weapon = weapons[i];
-        unit.equip(weapon, i === 0 ? "mainHand" : "offHand");
+        unit.equip(weapon, i === 0 ? MAIN_HAND_SLOT : OFF_HAND_SLOT);
       }
 
       const armors = jobArmor(job);
       for (let i = 0; i < armors.length; i++) {
         const armor = armors[i];
-        unit.equip(armor, i === 0 ? "body" : "head");
+        unit.equip(armor, i === 0 ? BODY_SLOT : HEAD_SLOT);
       }
 
       let tile: Tile | undefined = undefined;
@@ -161,7 +169,7 @@ export const createInitBattleState = (
     scene.add(board.group);
     scene.add(board.selector);
 
-    camera().position.y = settings.board.width / 2;
+    camera().position.y = BOARD_WIDTH / 2;
     camera().position.y = 10;
     camera().position.z = 10;
     camera().lookAt(board.group.position);

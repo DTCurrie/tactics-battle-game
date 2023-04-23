@@ -6,7 +6,7 @@ import { MarkerColor } from "@tactics-battle-game/core";
 
 export const createActionConfirmUi = (
   action: Action,
-  type: Extract<MarkerColor, "attack" | "support">
+  type: Extract<MarkerColor, "offense" | "support">
 ) => {
   const btns = buttons([
     button(

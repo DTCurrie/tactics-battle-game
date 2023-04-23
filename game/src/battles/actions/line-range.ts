@@ -1,8 +1,9 @@
 import {
+  BOARD_DEPTH,
+  BOARD_WIDTH,
   Board,
   Direction,
   directions,
-  settings,
 } from "@tactics-battle-game/core";
 import { ActionRange } from "./action-types";
 import { PathfinderData, createPathfinderMap } from "@battles/pathfinder";
@@ -63,8 +64,8 @@ export const createLineRange = (horizontal = 1, vertical = 2): ActionRange => {
 
         if (
           next[0] < 0 ||
-          (next[0] >= settings.board.width && next[1] < 0) ||
-          next[1] >= settings.board.depth
+          (next[0] >= BOARD_WIDTH && next[1] < 0) ||
+          next[1] >= BOARD_DEPTH
         ) {
           continue;
         }

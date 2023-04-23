@@ -1,64 +1,37 @@
-import { ReadableAtom, atom, map, deepMap, action, MapStore } from "nanostores";
-import { BaseStatsData, baseStatTypes } from "../units/stats";
-import { Action } from "@battles/actions/action-types";
+import { atom, deepMap, action } from "nanostores";
+import { BaseStatsData, BASE_STATS } from "../units/stats";
+import { logger } from "@lib/logger";
+import {
+  Equipable,
+  OffHand,
+  OFF_HAND_EQUIPMENT_TYPE,
+  Weapon,
+  MAIN_HAND_SLOT,
+  Armor,
+  BODY_SLOT,
+  HEAD_SLOT,
+  Accessory,
+  ACCESSORY_EQUIPMENT_TYPE,
+  EquipmentType,
+  WEAPON_EQUIPMENT_TYPE,
+  ARMOR_EQUIPMENT_TYPE,
+  EquipableOptions,
+  OffHandOptions,
+  WeaponOptions,
+  ArmorOptions,
+  AccessoryOptions,
+  EquipmentSlot,
+  WeaponSlot,
+  TWO_HANDED,
+  OFF_HAND_SLOT,
+  ACCESSORY_SLOT,
+} from "./equipment-types";
 
-export const offhandSlot = "offHand" as const;
-export type OffhandSlot = typeof offhandSlot;
+const { logError } = logger("equipment");
 
-export const weaponSlots = ["mainHand", offhandSlot] as const;
-export const weaponTypes = ["oneHanded", "twoHanded"] as const;
-export type WeaponSlot = (typeof weaponSlots)[number];
-export type WeaponType = (typeof weaponTypes)[number];
-export type WeaponAttackAction = Required<
-  Pick<Action, "power" | "range" | "target">
->;
-export type WeaponProperties = {
-  slot: WeaponSlot;
-  type: WeaponType;
-  attack: WeaponAttackAction;
-  dualWield?: boolean;
-};
-
-export const armorSlots = ["head", "body"] as const;
-export type ArmorSlot = (typeof armorSlots)[number];
-
-export const accessorySlot = "accessory" as const;
-export type AccessorySlot = typeof accessorySlot;
-
-export const equipmentSlots = [
-  ...weaponSlots,
-  ...armorSlots,
-  accessorySlot,
-] as const;
-
-export type EquipmentSlot = (typeof equipmentSlots)[number];
-
-export type Equipable = Readonly<{
-  name: string;
-  stats: MapStore<Partial<BaseStatsData>>;
-  equipped: ReadableAtom<boolean>;
-}> & {
-  equip: (stats: BaseStatsData) => BaseStatsData;
-  unequip: (stats: BaseStatsData) => BaseStatsData;
-};
-
-export type Offhand = Equipable & { slot: OffhandSlot };
-export type Weapon = Equipable & WeaponProperties;
-export type Armor = Equipable & { slot: ArmorSlot };
-export type Accessory = Equipable & { slot: AccessorySlot };
-
-export type EquipableOptions = Pick<Equipable, "name"> & {
-  stats: Partial<BaseStatsData>;
-};
-
-export type OffhandOptions = EquipableOptions & { slot: OffhandSlot };
-export type WeaponOptions = EquipableOptions & WeaponProperties;
-export type ArmorOptions = EquipableOptions & { slot: ArmorSlot };
-export type AccessoryOptions = EquipableOptions & { slot: AccessorySlot };
-
-export const Offhand = (item: Equipable) => {
-  if ((item as Offhand).slot === "offHand") {
-    return item as Offhand;
+export const isOffHand = (item: Equipable) => {
+  if ((item as OffHand).slot === OFF_HAND_SLOT) {
+    return item as OffHand;
   }
 
   return false;
@@ -66,8 +39,8 @@ export const Offhand = (item: Equipable) => {
 
 export const isWeapon = (item: Equipable) => {
   if (
-    (item as Weapon).slot === "mainHand" ||
-    (item as Weapon).slot === "offHand"
+    (item as Weapon).slot === MAIN_HAND_SLOT ||
+    (item as Weapon).slot === OFF_HAND_SLOT
   ) {
     return item as Weapon;
   }
@@ -76,7 +49,10 @@ export const isWeapon = (item: Equipable) => {
 };
 
 export const isArmor = (item: Equipable) => {
-  if ((item as Armor).slot === "body" || (item as Armor).slot === "head") {
+  if (
+    (item as Armor).slot === BODY_SLOT ||
+    (item as Armor).slot === HEAD_SLOT
+  ) {
     return item as Armor;
   }
 
@@ -84,42 +60,42 @@ export const isArmor = (item: Equipable) => {
 };
 
 export const isAccessory = (item: Equipable) => {
-  if ((item as Accessory).slot === "accessory") {
+  if ((item as Accessory).slot === ACCESSORY_SLOT) {
     return item as Accessory;
   }
 
   return false;
 };
 
-export const isOfType = (
-  item: Equipable,
-  type: "weapon" | "armor" | "accessory"
-) => {
-  if (type === "weapon") {
-    return isWeapon(item);
+export const isOfType = (item: Equipable, type: EquipmentType) => {
+  switch (type) {
+    case OFF_HAND_EQUIPMENT_TYPE:
+      return isOffHand(item);
+    case WEAPON_EQUIPMENT_TYPE:
+      return isWeapon(item);
+    case ARMOR_EQUIPMENT_TYPE:
+      return isArmor(item);
+    case ACCESSORY_EQUIPMENT_TYPE:
+      return isAccessory(item);
+    default:
+      logError("Invalid `type` argument passed to `isOfType`", { item, type });
+      return false;
   }
-
-  if (type === "armor") {
-    return isArmor(item);
-  }
-
-  return isAccessory(item);
 };
 
 export const createEquipable = ({
   name,
-  stats: initialStats,
+  stats,
 }: EquipableOptions): Equipable => {
   const equipped = atom(false);
-  const stats = map(initialStats);
 
   const equip = (unitStats: BaseStatsData) => {
     const next: BaseStatsData = { ...unitStats };
 
-    for (const stat of baseStatTypes) {
+    for (const stat of BASE_STATS) {
       let value = next[stat];
 
-      value += stats.get()[stat] ?? 0;
+      value += stats[stat] ?? 0;
       next[stat] = value;
     }
 
@@ -130,9 +106,9 @@ export const createEquipable = ({
   const unequip = (unitStats: BaseStatsData) => {
     const next: BaseStatsData = { ...unitStats };
 
-    for (const stat of baseStatTypes) {
+    for (const stat of BASE_STATS) {
       let value = next[stat];
-      value -= stats.get()[stat] ?? 0;
+      value -= stats[stat] ?? 0;
       next[stat] = value;
     }
 
@@ -150,11 +126,11 @@ export const createEquipable = ({
   };
 };
 
-export const createOffhand = ({
+export const createOffHand = ({
   name,
   stats,
   slot,
-}: OffhandOptions): Offhand => {
+}: OffHandOptions): OffHand => {
   const equipable = createEquipable({ name, stats });
 
   return {
@@ -209,13 +185,14 @@ export type EquipData = { stats: BaseStatsData; unequipped: Equipable[] };
 
 export type Equipment = {
   slots: () => EquipmentSlots;
+  getWeapon: (slot: WeaponSlot) => Weapon | undefined;
+
   equip: (
     unitStats: BaseStatsData,
     item: Equipable,
     slot: EquipmentSlot
   ) => EquipData;
 
-  getWeapon: (slot: WeaponSlot) => Weapon | undefined;
   unequip: (unitStats: BaseStatsData, slot: EquipmentSlot) => EquipData;
 
   debug: () => string;
@@ -245,49 +222,35 @@ export const createEquipment = (): Equipment => {
         unequipped.push(replaced);
       }
 
-      const mainHand = slot === "mainHand";
-      const offHand = slot === "offHand";
+      const mainHand = slot === MAIN_HAND_SLOT;
+      const offHand = slot === OFF_HAND_SLOT;
       const dualWield = (item as Weapon).dualWield;
 
       if (mainHand && !dualWield) {
         // If replacing main hand with non-dual-wield weapon, unequip off hand if equipped and dual-wield
-        const other = store.get()["offHand"];
+        const other = store.get()[OFF_HAND_SLOT];
         if (other && (other as Weapon).dualWield) {
-          stats = { ...other.unequip(stats) };
-          unequipped.push(other);
-        }
-      } else if (offHand && !dualWield) {
-        // If replacing off hand with non-dual-wield weapon, unequip main hand if equipped and dual-wield
-        const other = store.get()["mainHand"];
-        if (other && (other as Weapon).dualWield) {
-          stats = { ...other.unequip(stats) };
-          unequipped.push(other);
-        }
-      } else if (mainHand && dualWield) {
-        // If replacing main hand with dual-wield weapon, unequip off hand if equipped and non-dual-wield
-        const other = store.get()["offHand"];
-        if (other && !(other as Weapon).dualWield) {
           stats = { ...other.unequip(stats) };
           unequipped.push(other);
         }
       } else if (offHand && dualWield) {
         // If replacing off hand with dual-wield weapon, unequip main hand if equipped and non-dual-wield
-        const other = store.get()["mainHand"];
+        const other = store.get()[MAIN_HAND_SLOT];
         if (other && !(other as Weapon).dualWield) {
           stats = { ...other.unequip(stats) };
           unequipped.push(other);
         }
-      } else if (mainHand && (item as Weapon).type === "twoHanded") {
+      } else if (mainHand && (item as Weapon).type === TWO_HANDED) {
         // If replacing main hand with two-handed, unequip off hand if equipped
-        const other = store.get()["offHand"];
+        const other = store.get()[OFF_HAND_SLOT];
         if (other) {
           stats = { ...other.unequip(stats) };
           unequipped.push(other);
         }
       } else if (offHand) {
         // If replacing off hand, unequip two-handed weapon if equipped
-        const other = store.get()["mainHand"];
-        if (other && (other as Weapon).type === "twoHanded") {
+        const other = store.get()[MAIN_HAND_SLOT];
+        if (other && (other as Weapon).type === TWO_HANDED) {
           stats = { ...other.unequip(stats) };
           unequipped.push(other);
         }
@@ -329,3 +292,4 @@ export const createEquipment = (): Equipment => {
 };
 
 export * from "./equipment-data";
+export * from "./equipment-types";

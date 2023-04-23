@@ -1,27 +1,37 @@
 import { nanoid } from "nanoid";
 import { action, atom, map } from "nanostores";
 
-import { Job } from "../jobs";
+import { Job } from "@jobs";
 import {
+  ACCESSORY_SLOT,
+  BODY_SLOT,
   EquipData,
   Equipable,
   Equipment,
   EquipmentSlot,
+  HEAD_SLOT,
+  MAIN_HAND_SLOT,
+  OFF_HAND_SLOT,
   createEquipment,
   isAccessory,
   isArmor,
   isWeapon,
-} from "../equipment";
-import { logger } from "../lib/logger";
+} from "@equipment";
+import { logger } from "@lib/logger";
 
 import {
   BaseStatsData,
-  ExperienceStatsData,
+  RankStatsData,
   StatType,
   StatsData,
   VariableStatType,
   VariableStatsData,
-  variableStatTypes,
+  VARIABLE_STATS,
+  CURRENT_AP,
+  CURRENT_HP,
+  MAX_AP,
+  MAX_HP,
+  TURN_COUNTER,
 } from "./stats";
 
 export type Unit = Readonly<{
@@ -65,7 +75,7 @@ export const createUnit = ({
   const address = `${name} [${id}]`;
   const { logError } = logger(address);
 
-  const experienceStats = map<ExperienceStatsData>({
+  const experienceStats = map<RankStatsData>({
     level: 1,
     experience: 0,
     ...initialStats,
@@ -114,7 +124,7 @@ export const createUnit = ({
   );
 
   const getStat = (type: StatType | VariableStatType) => {
-    if (variableStatTypes.includes(type as VariableStatType)) {
+    if (VARIABLE_STATS.includes(type as VariableStatType)) {
       return variableStats.get()[type as VariableStatType];
     }
 
@@ -135,17 +145,20 @@ export const createUnit = ({
     "equip",
     (store, item: Equipable, slot: EquipmentSlot) => {
       let nextStats = store.get();
-      if ((slot === "mainHand" || slot === "offHand") && !isWeapon(item)) {
+      if (
+        (slot === MAIN_HAND_SLOT || slot === OFF_HAND_SLOT) &&
+        !isWeapon(item)
+      ) {
         logError("Invalid weapon to equip", { item, slot });
         return { stats: nextStats, unequipped: [] };
       }
 
-      if ((slot === "body" || slot === "head") && !isArmor(item)) {
+      if ((slot === BODY_SLOT || slot === HEAD_SLOT) && !isArmor(item)) {
         logError("Invalid armor to equip", { item, slot });
         return { stats: nextStats, unequipped: [] };
       }
 
-      if (slot === "accessory" && !isAccessory(item)) {
+      if (slot === ACCESSORY_SLOT && !isAccessory(item)) {
         logError("Invalid accessory to equip", { item, slot });
         return { stats: nextStats, unequipped: [] };
       }
@@ -184,7 +197,7 @@ export const createUnit = ({
     const { turnCounter } = store.get();
     let next = turnCounter;
     next += speed;
-    store.setKey("turnCounter", next);
+    store.setKey(TURN_COUNTER, next);
     return next;
   });
 
@@ -195,7 +208,7 @@ export const createUnit = ({
       const { turnCounter } = store.get();
       let next = turnCounter;
       next -= cost;
-      store.setKey("turnCounter", next);
+      store.setKey(TURN_COUNTER, next);
       return next;
     }
   );
@@ -209,11 +222,11 @@ export const createUnit = ({
         next = 0;
       }
 
-      if (next > stats.get()["maxHealthPoints"]) {
-        next = getStat("maxHealthPoints");
+      if (next > stats.get()[MAX_HP]) {
+        next = getStat(MAX_HP);
       }
 
-      store.setKey("currentHealthPoints", next);
+      store.setKey(CURRENT_HP, next);
       return next;
     }
   );
@@ -227,11 +240,11 @@ export const createUnit = ({
         next = 0;
       }
 
-      if (next > getStat("maxAbilityPoints")) {
-        next = getStat("maxAbilityPoints");
+      if (next > getStat(MAX_AP)) {
+        next = getStat(MAX_AP);
       }
 
-      store.setKey("currentAbilityPoints", next);
+      store.setKey(CURRENT_AP, next);
       return next;
     }
   );

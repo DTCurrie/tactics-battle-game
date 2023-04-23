@@ -6,8 +6,8 @@ import { createCommandSelectionState } from "./command-selection";
 import {
   Board,
   MarkerColor,
+  TILE_LAYER,
   getHeading,
-  settings,
 } from "@tactics-battle-game/core";
 import { Actor } from "@battles/actor";
 import { Action } from "@battles/actions/action-types";
@@ -20,11 +20,11 @@ export const createActionTargetUi = (
   board: Board,
   actor: Actor,
   action: Action,
-  type: Extract<MarkerColor, "attack" | "support">
+  type: Extract<MarkerColor, "offense" | "support">
 ) => {
   const pointer = new Vector2();
   const raycaster = new Raycaster();
-  raycaster.layers.set(settings.layers.tile);
+  raycaster.layers.set(TILE_LAYER);
 
   const btns = buttons([
     button("Cancel", () =>

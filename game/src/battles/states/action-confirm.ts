@@ -6,7 +6,7 @@ import { Actor } from "@battles/actor";
 
 export const createActionConfirmState = (
   action: Action,
-  type: Extract<MarkerColor, "attack" | "support">
+  type: Extract<MarkerColor, "offense" | "support">
 ): BattleState => {
   return {
     onEnter: ({ targets, getActorAtPosition }) => {

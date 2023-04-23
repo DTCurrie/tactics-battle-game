@@ -7,7 +7,11 @@ import {
 import { createMoveTargetState } from "./move-target";
 import { createAbilitySelectionState } from "./ability-selection";
 import { createActionTargetState } from "./action-target";
-import { WeaponAttackAction } from "@equipment/index";
+import {
+  MAIN_HAND_SLOT,
+  OFF_HAND_SLOT,
+  WeaponAttackAction,
+} from "@equipment/index";
 
 export const createCommandSelectionUi = ({
   turn,
@@ -18,7 +22,7 @@ export const createCommandSelectionUi = ({
   const moveLocked = turn.moveLocked();
   const acted = turn.acted();
   let attackAction: WeaponAttackAction;
-  let weapon = equipment.getWeapon("mainHand");
+  let weapon = equipment.getWeapon(MAIN_HAND_SLOT);
 
   const move = button("Move", () =>
     battleStateMachine().transition(createMoveTargetState())
@@ -32,7 +36,7 @@ export const createCommandSelectionUi = ({
 
   const attack = button("Attack", () => {
     battleStateMachine().transition(
-      createActionTargetState(attackAction, "attack")
+      createActionTargetState(attackAction, "offense")
     );
   });
 
@@ -74,7 +78,7 @@ export const createCommandSelectionUi = ({
   }
 
   if (weapon?.attack === undefined) {
-    weapon = equipment.getWeapon("offHand");
+    weapon = equipment.getWeapon(OFF_HAND_SLOT);
   }
 
   if (weapon?.attack === undefined) {

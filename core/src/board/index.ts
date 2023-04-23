@@ -6,7 +6,7 @@ import {
   Vector2Tuple,
   Vector3,
 } from "three";
-import { settings } from "../settings";
+import { BOARD_DEPTH, BOARD_WIDTH, STEP_HEIGHT } from "../settings";
 import { Level } from "../api/level-api";
 import { Tile, createTile, createTileMesh, markerColors } from "./tile";
 
@@ -24,8 +24,8 @@ export type Board = Readonly<{
 export const createBoard = (level: Level, selector: Group): Board => {
   const group = new Group();
 
-  const grid: Tile[][] = Array.from({ length: settings.board.width }, () =>
-    Array.from({ length: settings.board.depth })
+  const grid: Tile[][] = Array.from({ length: BOARD_WIDTH }, () =>
+    Array.from({ length: BOARD_DEPTH })
   );
 
   const getTile = ([x, y]: Vector2Tuple) => grid[x][y];
@@ -53,10 +53,10 @@ export const createBoard = (level: Level, selector: Group): Board => {
   group.add(selector);
   group.position.set(0, 0, 0);
 
-  for (let x = 0; x < settings.board.width; x++) {
-    for (let y = 0; y < settings.board.depth; y++) {
+  for (let x = 0; x < BOARD_WIDTH; x++) {
+    for (let y = 0; y < BOARD_DEPTH; y++) {
       const gridSquare = new Mesh(
-        new BoxGeometry(0.9, settings.stepHeight, 0.9),
+        new BoxGeometry(0.9, STEP_HEIGHT, 0.9),
         new MeshToonMaterial({
           color: "ghostwhite",
           opacity: 0.25,
@@ -64,7 +64,7 @@ export const createBoard = (level: Level, selector: Group): Board => {
         })
       );
 
-      gridSquare.position.set(x, -settings.stepHeight / 2, y);
+      gridSquare.position.set(x, -STEP_HEIGHT / 2, y);
       group.add(gridSquare);
     }
   }

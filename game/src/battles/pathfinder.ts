@@ -1,6 +1,7 @@
 import {
+  BOARD_DEPTH,
+  BOARD_WIDTH,
   Board,
-  settings,
   Tile,
   normalizedDirections,
 } from "@tactics-battle-game/core";
@@ -37,13 +38,12 @@ export type Pathfinder = Readonly<{
 };
 
 export const createPathfinderMap = (board: Board) => {
-  const map: PathfinderData[][] = Array.from(
-    { length: settings.board.width },
-    () => Array.from({ length: settings.board.depth })
+  const map: PathfinderData[][] = Array.from({ length: BOARD_WIDTH }, () =>
+    Array.from({ length: BOARD_DEPTH })
   );
 
-  for (let x = 0; x < settings.board.width; x++) {
-    for (let y = 0; y < settings.board.depth; y++) {
+  for (let x = 0; x < BOARD_WIDTH; x++) {
+    for (let y = 0; y < BOARD_DEPTH; y++) {
       const coordinates: Vector2Tuple = [x, y];
 
       map[x][y] = {

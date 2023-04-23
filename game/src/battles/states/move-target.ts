@@ -1,6 +1,7 @@
 import { PathfinderData, createPathfinder, simpleSearch } from "../pathfinder";
 import { BattleState } from "../battle-state-machine";
 import { createMoveTargetUi } from "./move-target-ui";
+import { JUMP, MOVE } from "@units/stats";
 
 export const createMoveTargetState = (): BattleState => {
   let paths: PathfinderData[] = [];
@@ -22,12 +23,12 @@ export const createMoveTargetState = (): BattleState => {
         const fromHeight = from.tile.height();
         const toHeight = to.tile.height();
         const heightAbs = Math.abs(fromHeight - toHeight);
-        const jumpHeight = actor.getStat("jump");
+        const jumpHeight = actor.getStat(JUMP);
         if (heightAbs > jumpHeight) {
           return false;
         }
 
-        const move = actor.getStat("move");
+        const move = actor.getStat(MOVE);
         return simpleSearch(move, from.cost);
       };
 
@@ -38,7 +39,7 @@ export const createMoveTargetState = (): BattleState => {
       );
 
       for (const path of paths) {
-        path.tile.setMarked("move");
+        path.tile.setMarked("movement");
       }
 
       return { ui: createMoveTargetUi(board, pathfinder) };

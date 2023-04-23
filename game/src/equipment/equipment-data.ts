@@ -1,158 +1,144 @@
 import { createLineRange } from "@battles/actions/line-range";
-import {
-  Armor,
-  ArmorOptions,
-  Offhand,
-  OffhandOptions,
-  Weapon,
-  WeaponOptions,
-  createArmor,
-  createOffhand,
-  createWeapon,
-} from ".";
 import { createAreaRange } from "@battles/actions/area-range";
 import { createWeaponPower } from "@battles/actions/weapon-power";
 import { createWeaponTarget } from "@battles/actions/weapon-target";
+import { createAccessory, createArmor, createOffHand, createWeapon } from ".";
+import {
+  OFF_HAND_SLOT,
+  MAIN_HAND_SLOT,
+  ONE_HANDED,
+  TWO_HANDED,
+  BODY_SLOT,
+  HEAD_SLOT,
+  ACCESSORY_SLOT,
+} from "./equipment-types";
 
-export const offhandData: Readonly<Record<string, OffhandOptions>> = {
-  shield: {
-    name: "Shield",
-    slot: "offHand",
-    stats: {
-      defense: 4,
-    },
-  },
-};
+export const OFF_HAND_FACTORIES = {
+  shield: () =>
+    createOffHand({
+      name: "Shield",
+      slot: OFF_HAND_SLOT,
+      stats: {
+        defense: 4,
+      },
+    }),
+} as const;
 
-export const createShield = (): Offhand => createOffhand(offhandData.shield);
+export const WEAPON_FACTORIES = {
+  dagger: () =>
+    createWeapon({
+      name: "Dagger",
+      slot: MAIN_HAND_SLOT,
+      type: ONE_HANDED,
+      dualWield: true,
+      attack: {
+        range: createLineRange(),
+        power: createWeaponPower(),
+        target: createWeaponTarget(),
+      },
+      stats: {
+        attack: 6,
+      },
+    }),
 
-export const offhandFactories = {
-  shield: createShield,
-};
+  sword: () =>
+    createWeapon({
+      name: "Sword",
+      slot: MAIN_HAND_SLOT,
+      type: ONE_HANDED,
+      attack: {
+        range: createLineRange(),
+        power: createWeaponPower(),
+        target: createWeaponTarget(),
+      },
+      stats: {
+        attack: 8,
+      },
+    }),
 
-export const weaponData: Readonly<Record<string, WeaponOptions>> = {
-  dagger: {
-    name: "Dagger",
-    slot: "mainHand",
-    type: "oneHanded",
-    dualWield: true,
-    attack: {
-      range: createLineRange(),
-      power: createWeaponPower(),
-      target: createWeaponTarget(),
-    },
-    stats: {
-      attack: 6,
-    },
-  },
+  staff: () =>
+    createWeapon({
+      name: "Staff",
+      slot: MAIN_HAND_SLOT,
+      type: TWO_HANDED,
+      attack: {
+        range: createAreaRange(2),
+        power: createWeaponPower(),
+        target: createWeaponTarget(),
+      },
+      stats: {
+        attack: 2,
+        arcana: 6,
+      },
+    }),
+} as const;
 
-  sword: {
-    name: "Sword",
-    slot: "mainHand",
-    type: "oneHanded",
-    attack: {
-      range: createLineRange(),
-      power: createWeaponPower(),
-      target: createWeaponTarget(),
-    },
-    stats: {
-      attack: 8,
-    },
-  },
+export const ARMOR_FACTORIES = {
+  tunic: () =>
+    createArmor({
+      name: "Tunic",
+      slot: BODY_SLOT,
+      stats: {
+        defense: 4,
+        evade: 2,
+      },
+    }),
 
-  staff: {
-    name: "Staff",
-    slot: "mainHand",
-    type: "twoHanded",
-    attack: {
-      range: createAreaRange(2),
-      power: createWeaponPower(),
-      target: createWeaponTarget(),
-    },
-    stats: {
-      attack: 2,
-      arcana: 6,
-    },
-  },
-};
+  chainmail: () =>
+    createArmor({
+      name: "Chainmail",
+      slot: BODY_SLOT,
+      stats: {
+        defense: 6,
+      },
+    }),
 
-export const createDagger = (): Weapon => createWeapon(weaponData.dagger);
-export const createSword = (): Weapon => createWeapon(weaponData.sword);
-export const createStaff = (): Weapon => createWeapon(weaponData.staff);
+  robe: () =>
+    createArmor({
+      name: "Robe",
+      slot: BODY_SLOT,
+      stats: {
+        defense: 2,
+        spirit: 4,
+      },
+    }),
 
-export const weaponFactories = {
-  dagger: createDagger,
-  sword: createSword,
-  staff: createStaff,
-};
+  cap: () =>
+    createArmor({
+      name: "Cap",
+      slot: HEAD_SLOT,
+      stats: {
+        defense: 2,
+        spirit: 2,
+      },
+    }),
 
-export const armorData: Readonly<Record<string, ArmorOptions>> = {
-  leatherTunic: {
-    name: "Leather Tunic",
-    slot: "body",
-    stats: {
-      defense: 4,
-      evade: 2,
-    },
-  },
+  helm: () =>
+    createArmor({
+      name: "Helm",
+      slot: HEAD_SLOT,
+      stats: {
+        defense: 4,
+      },
+    }),
 
-  chainmail: {
-    name: "Chainmail",
-    slot: "body",
-    stats: {
-      defense: 6,
-    },
-  },
+  strawHat: () =>
+    createArmor({
+      name: "Straw Hat",
+      slot: HEAD_SLOT,
+      stats: {
+        spirit: 4,
+      },
+    }),
+} as const;
 
-  robe: {
-    name: "Robe",
-    slot: "body",
-    stats: {
-      defense: 2,
-      spirit: 4,
-    },
-  },
-
-  cap: {
-    name: "Cap",
-    slot: "head",
-    stats: {
-      defense: 2,
-      spirit: 2,
-    },
-  },
-
-  helm: {
-    name: "Helm",
-    slot: "head",
-    stats: {
-      defense: 4,
-    },
-  },
-
-  strawHat: {
-    name: "Straw Hat",
-    slot: "head",
-    stats: {
-      spirit: 4,
-    },
-  },
-};
-
-export const createLeatherTunic = (): Armor =>
-  createArmor(armorData.leatherTunic);
-
-export const createChainmail = (): Armor => createArmor(armorData.chainmail);
-export const createRobe = (): Armor => createArmor(armorData.robe);
-export const createCap = (): Armor => createArmor(armorData.cap);
-export const createHelm = (): Armor => createArmor(armorData.helm);
-export const createStrawHat = (): Armor => createArmor(armorData.strawHat);
-
-export const armorFactories = {
-  leatherTunic: createLeatherTunic,
-  chainmail: createChainmail,
-  robe: createRobe,
-  cap: createCap,
-  helm: createHelm,
-  strawHat: createStrawHat,
-};
+export const ACCESSORY_FACTORIES = {
+  runningShoes: () =>
+    createAccessory({
+      name: "Running Shoes",
+      slot: ACCESSORY_SLOT,
+      stats: {
+        move: 1,
+      },
+    }),
+} as const;

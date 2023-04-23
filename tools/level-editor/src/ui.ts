@@ -17,18 +17,14 @@ export const createLevelEditorUi = (
 
   const btns = buttons([
     button("Set Random Height", () =>
-      levelEditor.adjustRandom(
-        Math.floor(Math.random() * settings.board.height)
-      )
+      levelEditor.adjustRandom(Math.floor(Math.random() * BOARD_HEIGHT))
     ),
     button("Set Random Ground", () => levelEditor.adjustRandom(1)),
     button("Randomize", () => {
       let count = 0;
 
       function randomizer() {
-        levelEditor.adjustRandom(
-          Math.floor(Math.random() * settings.board.height)
-        );
+        levelEditor.adjustRandom(Math.floor(Math.random() * BOARD_HEIGHT));
         count++;
         if (count < 100) {
           setTimeout(randomizer, 10);
