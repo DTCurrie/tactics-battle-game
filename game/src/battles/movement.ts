@@ -1,9 +1,9 @@
-import { getHeading } from "@tactics-battle-game/core";
 import { Vector3 } from "three";
-import { PathfinderData, simpleSearch } from "./pathfinder";
-import { logger } from "../lib/logger";
 import { Easing, Tween } from "@tweenjs/tween.js";
+import { getHeading } from "@tactics-battle-game/core";
+import { logger } from "@lib/logger";
 import { Actor } from "./actor";
+import { PathfinderData, simpleSearch } from "./pathfinder";
 
 export interface Movement {
   move: (target: PathfinderData) => Tween<Vector3>[];
@@ -115,7 +115,7 @@ export const createWalkMovement = ({
   };
 
   const walkOrJump = (from: PathfinderData, to: PathfinderData) =>
-    from.tile?.height() === to.tile?.height() ? [walk(to)] : jump(to);
+    from.tile.height() === to.tile.height() ? [walk(to)] : jump(to);
 
   function move(target: PathfinderData): Tween<Vector3>[] {
     const from = target.previous;

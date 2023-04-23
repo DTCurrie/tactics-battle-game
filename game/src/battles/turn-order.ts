@@ -1,8 +1,8 @@
-import { Board, Direction } from "@tactics-battle-game/core";
-import { Actor } from "./actor";
-import { action, atom } from "nanostores";
 import { Vector2Tuple } from "three";
+import { action, atom } from "nanostores";
+import { Board, Direction } from "@tactics-battle-game/core";
 import { TURN_COUNTER } from "@units/stats";
+import { Actor } from "./actor";
 
 const activationCost = 100;
 const turnCost = 50;

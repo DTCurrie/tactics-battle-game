@@ -1,9 +1,9 @@
 import {
   BaseStatsData,
   GrowthStatsData,
-  BASE_STATS,
   GROWTH_STATS,
-} from "../units";
+  BASE_STATS,
+} from "@units/stats";
 
 export type Job = Readonly<{
   name: string;

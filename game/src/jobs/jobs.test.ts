@@ -1,7 +1,7 @@
-import { BASE_STATS, GROWTH_STATS } from "@units/stats";
 import { expect, test, describe } from "vitest";
-import { JOB_FACTORIES } from "./jobs-data";
+import { BASE_STATS, GROWTH_STATS } from "@units/stats";
 import { TEST_BASE_STATS } from "@units/units.test";
+import { JOB_FACTORIES } from "./jobs-data";
 
 describe("Job", () => {
   test(".employ()", () => {

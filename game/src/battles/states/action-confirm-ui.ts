@@ -1,8 +1,8 @@
-import { button, buttons } from "@tactics-battle-game/ui";
-import { battleStateMachine } from "../battle-state-machine";
-import { createActionTargetState } from "./action-target";
-import { Action } from "@battles/actions/action-types";
 import { MarkerColor } from "@tactics-battle-game/core";
+import { button, buttons } from "@tactics-battle-game/ui";
+import { Action } from "@actions/action-types";
+import { battleStateMachine } from "@battles";
+import { createActionTargetState } from "./action-target";
 
 export const createActionConfirmUi = (
   action: Action,

@@ -1,11 +1,11 @@
 import { Raycaster, Vector2, Vector2Tuple } from "three";
-import { button, buttons } from "@tactics-battle-game/ui";
-import { three, updatesSystem } from "@tactics-battle-game/three-utils";
-import { battleStateMachine } from "../battle-state-machine";
-import { createCommandSelectionState } from "./command-selection";
 import { Board, TILE_LAYER } from "@tactics-battle-game/core";
+import { three, updatesSystem } from "@tactics-battle-game/three-utils";
+import { button, buttons } from "@tactics-battle-game/ui";
+
+import { Pathfinder, battleStateMachine } from "@battles";
+import { createCommandSelectionState } from "./command-selection";
 import { createMoveSequenceState } from "./move-sequence";
-import { Pathfinder } from "../pathfinder";
 
 const { renderer, camera } = three();
 const { addUpdate, removeUpdate } = updatesSystem();

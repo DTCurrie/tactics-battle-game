@@ -1,6 +1,6 @@
-import { BattleState } from "@battles/battle-state-machine";
-import { Action } from "@battles/actions/action-types";
 import { MarkerColor, Tile } from "@tactics-battle-game/core";
+import { Action } from "@actions/action-types";
+import { BattleState } from "@battles";
 import { createActionTargetUi } from "./action-target-ui";
 
 export const createActionTargetState = (

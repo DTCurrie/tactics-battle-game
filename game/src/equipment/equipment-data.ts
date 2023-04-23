@@ -1,8 +1,8 @@
-import { createLineRange } from "@battles/actions/line-range";
-import { createAreaRange } from "@battles/actions/area-range";
-import { createWeaponPower } from "@battles/actions/weapon-power";
-import { createWeaponTarget } from "@battles/actions/weapon-target";
-import { createAccessory, createArmor, createOffHand, createWeapon } from ".";
+import { createAreaRange } from "@actions/area-range";
+import { createLineRange } from "@actions/line-range";
+import { createWeaponPower } from "@actions/weapon-power";
+import { createWeaponTarget } from "@actions/weapon-target";
+import { createOffHand, createWeapon, createArmor, createAccessory } from ".";
 import {
   OFF_HAND_SLOT,
   MAIN_HAND_SLOT,

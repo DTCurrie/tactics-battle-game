@@ -1,20 +1,22 @@
 import { atom, deepMap, action } from "nanostores";
-import { BaseStatsData, BASE_STATS } from "../units/stats";
 import { logger } from "@lib/logger";
+import { BaseStatsData, BASE_STATS } from "@units/stats";
 import {
   Equipable,
   OffHand,
-  OFF_HAND_EQUIPMENT_TYPE,
+  OFF_HAND_SLOT,
   Weapon,
   MAIN_HAND_SLOT,
   Armor,
   BODY_SLOT,
   HEAD_SLOT,
   Accessory,
-  ACCESSORY_EQUIPMENT_TYPE,
+  ACCESSORY_SLOT,
   EquipmentType,
+  OFF_HAND_EQUIPMENT_TYPE,
   WEAPON_EQUIPMENT_TYPE,
   ARMOR_EQUIPMENT_TYPE,
+  ACCESSORY_EQUIPMENT_TYPE,
   EquipableOptions,
   OffHandOptions,
   WeaponOptions,
@@ -23,8 +25,6 @@ import {
   EquipmentSlot,
   WeaponSlot,
   TWO_HANDED,
-  OFF_HAND_SLOT,
-  ACCESSORY_SLOT,
 } from "./equipment-types";
 
 const { logError } = logger("equipment");

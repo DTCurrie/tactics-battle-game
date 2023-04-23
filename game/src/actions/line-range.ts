@@ -1,3 +1,4 @@
+import { Vector2Tuple } from "three";
 import {
   BOARD_DEPTH,
   BOARD_WIDTH,
@@ -5,10 +6,8 @@ import {
   Direction,
   directions,
 } from "@tactics-battle-game/core";
+import { Actor, PathfinderData, createPathfinderMap } from "@battles";
 import { ActionRange } from "./action-types";
-import { PathfinderData, createPathfinderMap } from "@battles/pathfinder";
-import { Actor } from "@battles/actor";
-import { Vector2Tuple } from "three";
 
 export const createLineRange = (horizontal = 1, vertical = 2): ActionRange => {
   const getPathsInRange = (board: Board, actor: Actor): PathfinderData[] => {

@@ -1,4 +1,4 @@
-import { BattleState } from "@battles/battle-state-machine";
+import { BattleState } from "@battles";
 import { createCommandSelectionUi } from "./command-selection-ui";
 
 export const createCommandSelectionState = (): BattleState => {

@@ -1,7 +1,6 @@
 import { Board } from "@tactics-battle-game/core";
+import { Actor, PathfinderData } from "@battles";
 import { Unit } from "@units";
-import { PathfinderData } from "@battles/pathfinder";
-import { Actor } from "@battles/actor";
 
 export type ActionArea = {
   getTilesInArea: (board: Board, target: PathfinderData) => PathfinderData[];

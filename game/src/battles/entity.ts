@@ -1,6 +1,6 @@
 import { Box3, Mesh, Object3D, Quaternion, Vector2Tuple, Vector3 } from "three";
-import { Direction, getNormal } from "../../../core/src/board/direction";
 import { action, atom } from "nanostores";
+import { Direction, getNormal } from "@tactics-battle-game/core";
 
 export type Entity = Readonly<{
   object3d: Object3D;

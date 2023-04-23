@@ -1,3 +1,5 @@
+import { Vector2Tuple } from "three";
+import { ReadableAtom, action, atom } from "nanostores";
 import {
   BOARD_DEPTH,
   BOARD_WIDTH,
@@ -5,9 +7,7 @@ import {
   Tile,
   normalizedDirections,
 } from "@tactics-battle-game/core";
-import { Vector2Tuple } from "three";
-import { createQueue } from "../lib/queue";
-import { ReadableAtom, action, atom } from "nanostores";
+import { createQueue } from "@lib/queue";
 
 export type PathfinderData = {
   previous?: PathfinderData;

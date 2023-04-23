@@ -1,16 +1,17 @@
 import { Raycaster, Vector2, Vector2Tuple } from "three";
-import { button, buttons } from "@tactics-battle-game/ui";
-import { three, updatesSystem } from "@tactics-battle-game/three-utils";
-import { battleStateMachine } from "../battle-state-machine";
-import { createCommandSelectionState } from "./command-selection";
 import {
   Board,
   MarkerColor,
   TILE_LAYER,
   getHeading,
 } from "@tactics-battle-game/core";
-import { Actor } from "@battles/actor";
-import { Action } from "@battles/actions/action-types";
+import { button, buttons } from "@tactics-battle-game/ui";
+import { three, updatesSystem } from "@tactics-battle-game/three-utils";
+
+import { Actor, battleStateMachine } from "@battles";
+import { Action } from "@actions/action-types";
+
+import { createCommandSelectionState } from "./command-selection";
 import { createActionConfirmState } from "./action-confirm";
 
 const { renderer, camera } = three();

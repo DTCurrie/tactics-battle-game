@@ -105,6 +105,7 @@ describe("messenger", () => {
         some: "thing",
         count: 1234,
         map: { first: "first", second: "second" },
+        time: new Date(),
       });
     }
 

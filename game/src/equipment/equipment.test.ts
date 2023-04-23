@@ -1,20 +1,20 @@
+import { describe, expect, test } from "vitest";
 import { BASE_STATS } from "@units/stats";
-import { expect, test, describe } from "vitest";
+import { TEST_BASE_STATS } from "@units/units.test";
+import { createEquipment } from ".";
 import {
-  ACCESSORY_FACTORIES,
-  ARMOR_FACTORIES,
-  OFF_HAND_FACTORIES,
   WEAPON_FACTORIES,
+  OFF_HAND_FACTORIES,
+  ARMOR_FACTORIES,
+  ACCESSORY_FACTORIES,
 } from "./equipment-data";
 import {
-  ACCESSORY_SLOT,
+  OFF_HAND_SLOT,
+  MAIN_HAND_SLOT,
   BODY_SLOT,
   HEAD_SLOT,
-  MAIN_HAND_SLOT,
-  OFF_HAND_SLOT,
-  createEquipment,
-} from ".";
-import { TEST_BASE_STATS } from "@units/units.test";
+  ACCESSORY_SLOT,
+} from "./equipment-types";
 
 describe("Equipable", () => {
   test(".equip()", () => {

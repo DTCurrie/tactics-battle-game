@@ -1,5 +1,4 @@
-import { BattleState, battleStateMachine } from "../battle-state-machine";
-import { PathfinderData } from "../pathfinder";
+import { PathfinderData, BattleState, battleStateMachine } from "@battles";
 import { createMoveStepState } from "./move-step";
 
 export const createMoveSequenceState = (

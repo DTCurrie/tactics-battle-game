@@ -1,8 +1,7 @@
-import { BattleState } from "@battles/battle-state-machine";
-import { Action } from "@battles/actions/action-types";
 import { MarkerColor } from "@tactics-battle-game/core";
+import { Action } from "@actions/action-types";
+import { Actor, BattleState } from "@battles";
 import { createActionConfirmUi } from "./action-confirm-ui";
-import { Actor } from "@battles/actor";
 
 export const createActionConfirmState = (
   action: Action,

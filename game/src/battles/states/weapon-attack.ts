@@ -1,8 +1,8 @@
+import { createWeaponPower } from "@actions/weapon-power";
+import { BattleState, battleStateMachine } from "@battles";
 import { MAIN_HAND_SLOT, OFF_HAND_SLOT, WeaponSlot } from "@equipment";
-import { createWeaponPower } from "../actions/weapon-power";
-import { BattleState, battleStateMachine } from "../battle-state-machine";
-import { createCommandSelectionState } from "./command-selection";
 import { ATTACK } from "@units/stats";
+import { createCommandSelectionState } from "./command-selection";
 
 export const createWeaponAttackState = (
   slot: WeaponSlot = MAIN_HAND_SLOT

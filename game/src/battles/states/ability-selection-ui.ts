@@ -1,5 +1,5 @@
 import { button, buttons } from "@tactics-battle-game/ui";
-import { battleStateMachine } from "@battles/battle-state-machine";
+import { battleStateMachine } from "@battles";
 import { createCommandSelectionState } from "./command-selection";
 
 export const createAbilitySelectionUi = () => {

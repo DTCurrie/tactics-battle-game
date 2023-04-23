@@ -17,11 +17,18 @@ import {
 } from "@tactics-battle-game/core";
 import { three } from "@tactics-battle-game/three-utils";
 
-import { Actor, createActor } from "@battles/actor";
-import { BattleState, battleStateMachine } from "@battles/battle-state-machine";
-import { createEntity } from "@battles/entity";
-import { Faction, Factions } from "@battles/faction";
-import { createTurn, createTurnOrder } from "@battles/turn-order";
+import {
+  Faction,
+  Factions,
+  BattleState,
+  Actor,
+  createEntity,
+  createActor,
+  createTurn,
+  createTurnOrder,
+  battleStateMachine,
+} from "@battles";
+
 import {
   BODY_SLOT,
   HEAD_SLOT,
@@ -31,6 +38,7 @@ import {
   OFF_HAND_FACTORIES,
   WEAPON_FACTORIES,
 } from "@equipment";
+
 import { JOB_FACTORIES } from "@jobs";
 import { createUnit } from "@units";
 

@@ -1,12 +1,14 @@
+import { Vector2Tuple } from "three";
 import { Board } from "@tactics-battle-game/core";
-import { ActionRange } from "./action-types";
+
 import {
+  Actor,
   PathfinderData,
   createPathfinder,
   simpleSearch,
-} from "@battles/pathfinder";
-import { Actor } from "@battles/actor";
-import { Vector2Tuple } from "three";
+} from "@battles";
+
+import { ActionRange } from "./action-types";
 
 export const createAreaRange = (horizontal = 3, vertical = 1): ActionRange => {
   const expandSearch = (from: PathfinderData, to: PathfinderData) => {

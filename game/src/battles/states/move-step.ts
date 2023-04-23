@@ -1,7 +1,10 @@
-import { BattleState, battleStateMachine } from "../battle-state-machine";
-import { PathfinderData } from "../pathfinder";
+import {
+  PathfinderData,
+  BattleState,
+  createWalkMovement,
+  battleStateMachine,
+} from "@battles";
 import { createCommandSelectionState } from "./command-selection";
-import { createWalkMovement } from "../movement";
 
 export const createMoveStepState = (
   targets: PathfinderData[],

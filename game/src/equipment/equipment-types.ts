@@ -1,6 +1,6 @@
-import { Action } from "@battles/actions/action-types";
-import { BaseStatsData } from "@units/stats";
 import { ReadableAtom } from "nanostores";
+import { Action } from "@actions/action-types";
+import { BaseStatsData } from "@units/stats";
 
 export const OFF_HAND_EQUIPMENT_TYPE = "offHand" as const;
 export const OFF_HAND_SLOT = OFF_HAND_EQUIPMENT_TYPE;

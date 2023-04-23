@@ -1,37 +1,41 @@
 import { nanoid } from "nanoid";
-import { action, atom, map } from "nanostores";
+import { map, atom, action } from "nanostores";
 
-import { Job } from "@jobs";
 import {
-  ACCESSORY_SLOT,
-  BODY_SLOT,
-  EquipData,
   Equipable,
-  Equipment,
   EquipmentSlot,
-  HEAD_SLOT,
   MAIN_HAND_SLOT,
   OFF_HAND_SLOT,
+  BODY_SLOT,
+  HEAD_SLOT,
+  ACCESSORY_SLOT,
+} from "@equipment/equipment-types";
+
+import {
+  Equipment,
+  EquipData,
   createEquipment,
-  isAccessory,
-  isArmor,
   isWeapon,
-} from "@equipment";
+  isArmor,
+  isAccessory,
+} from "@equipment/index";
+
+import { Job } from "@jobs/index";
 import { logger } from "@lib/logger";
 
 import {
   BaseStatsData,
-  RankStatsData,
-  StatType,
   StatsData,
+  StatType,
   VariableStatType,
+  RankStatsData,
   VariableStatsData,
   VARIABLE_STATS,
-  CURRENT_AP,
+  TURN_COUNTER,
+  MAX_HP,
   CURRENT_HP,
   MAX_AP,
-  MAX_HP,
-  TURN_COUNTER,
+  CURRENT_AP,
 } from "./stats";
 
 export type Unit = Readonly<{

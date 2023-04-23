@@ -15,13 +15,16 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "paths": {
+      "@actions/*": ["./src/actions/*"],
       "@battles/*": ["./src/battles/*"],
+      "@battles": ["./src/battles"],
       "@equipment/*": ["./src/equipment/*"],
       "@equipment": ["./src/equipment"],
       "@jobs/*": ["./src/jobs/*"],
       "@jobs": ["./src/jobs"],
       "@lib/*": ["./src/lib/*"],
       "@modifiers/*": ["./src/modifiers/*"],
+      "@modifiers": ["./src/modifiers"],
       "@units/*": ["./src/units/*"],
       "@units": ["./src/units"]
     }

@@ -1,14 +1,15 @@
 import { DirectionalLight } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { listLevels } from "@tactics-battle-game/core";
 import {
-  gltfLoader,
   three,
   updatesSystem,
+  gltfLoader,
 } from "@tactics-battle-game/three-utils";
-import { battleStateMachine } from "./battles/battle-state-machine";
-import { createInitBattleState } from "./battles/states/init-battle";
-import { logger } from "./lib/logger";
-import { listLevels } from "@tactics-battle-game/core";
+
+import { battleStateMachine } from "@battles";
+import { createInitBattleState } from "@battles/states/init-battle";
+import { logger } from "@lib/logger";
 
 const { scene, camera, renderer, play } = three();
 const { addUpdate } = updatesSystem();

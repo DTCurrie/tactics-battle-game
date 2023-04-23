@@ -30,6 +30,7 @@ export type Messenger = Readonly<{
     sender?: Sender,
     data?: ListenerData
   ) => void;
+
   clean: () => void;
 };
 

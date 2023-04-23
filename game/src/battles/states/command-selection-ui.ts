@@ -1,17 +1,10 @@
 import { button, buttons } from "@tactics-battle-game/ui";
-import {
-  BattleContext,
-  battleStateMachine,
-} from "@battles/battle-state-machine";
+import { BattleContext, battleStateMachine } from "@battles";
+import { MAIN_HAND_SLOT, OFF_HAND_SLOT, WeaponAttackAction } from "@equipment";
 
 import { createMoveTargetState } from "./move-target";
 import { createAbilitySelectionState } from "./ability-selection";
 import { createActionTargetState } from "./action-target";
-import {
-  MAIN_HAND_SLOT,
-  OFF_HAND_SLOT,
-  WeaponAttackAction,
-} from "@equipment/index";
 
 export const createCommandSelectionUi = ({
   turn,
