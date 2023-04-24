@@ -3,6 +3,7 @@ import {
   Board,
   MarkerColor,
   TILE_LAYER,
+  Tile,
   getHeading,
 } from "@tactics-battle-game/core";
 import { button, buttons } from "@tactics-battle-game/ui";
@@ -23,6 +24,14 @@ export const createActionTargetUi = (
   action: Action,
   type: Extract<MarkerColor, "offense" | "support">
 ) => {
+  const currentCandidates: Record<MarkerColor | "undefined", Tile[]> = {
+    selected: [],
+    movement: [],
+    offense: [],
+    support: [],
+    undefined: [],
+  };
+
   const pointer = new Vector2();
   const raycaster = new Raycaster();
   raycaster.layers.set(TILE_LAYER);
@@ -47,12 +56,12 @@ export const createActionTargetUi = (
       return;
     }
 
-    const [x, y]: Vector2Tuple = [
+    const coordinates: Vector2Tuple = [
       Math.floor(intersects[0].object.position.x),
       Math.floor(intersects[0].object.position.z),
     ];
 
-    const tile = board.getTile([x, y]);
+    const tile = board.getTile(coordinates);
 
     if (!tile || !tile.marked() || !tile.occupied()) {
       return;
@@ -69,10 +78,37 @@ export const createActionTargetUi = (
 
     const intersects = raycaster.intersectObjects(board.group.children, false);
     if (intersects.length) {
-      board.moveSelector([
+      const coordinates: Vector2Tuple = [
         Math.floor(intersects[0].object.position.x),
         Math.floor(intersects[0].object.position.z),
-      ]);
+      ];
+
+      const tile = board.getTile(coordinates);
+
+      if (!tile || !tile.marked() || !tile.occupied()) {
+        return;
+      }
+
+      board.moveSelector(coordinates);
+
+      for (const color in currentCandidates) {
+        const marker = color as MarkerColor;
+        const tiles = currentCandidates[marker];
+
+        for (const reset of tiles) {
+          reset.setMarked(marker);
+        }
+
+        currentCandidates[marker] = [];
+      }
+
+      const candidates = action.area?.getTilesInArea(board, tile) ?? [];
+      if (candidates.length > 0) {
+        for (const candidate of candidates) {
+          currentCandidates[`${tile.marked()}`].push(tile);
+          candidate.setMarked("selected");
+        }
+      }
     }
   };
 

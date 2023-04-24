@@ -1,13 +1,30 @@
 {
   "root": true,
-  "extends": ["eslint:recommended", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "prettier",
+    "plugin:tailwindcss/recommended"
+  ],
   "overrides": [
     {
-      "files": ["scripts/*.js"],
+      "files": ["**/*.js", "**/*.cjs"],
       "env": {
         "node": true,
         "es2021": true
       }
+    },
+    {
+      "files": ["**/*/tailwind.config.ts"],
+      "env": {
+        "node": true,
+        "es2021": true
+      },
+      "extends": ["plugin:@typescript-eslint/recommended"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "ecmaVersion": "latest"
+      },
+      "plugins": ["@typescript-eslint"]
     },
     {
       "files": ["**/*.ts"],
@@ -15,11 +32,7 @@
         "browser": true,
         "es2021": true
       },
-      "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended",
-        "prettier"
-      ],
+      "extends": ["plugin:@typescript-eslint/recommended"],
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
         "ecmaVersion": "latest",

@@ -4,15 +4,15 @@ import {
   BOARD_WIDTH,
   Board,
   Direction,
+  Tile,
   directions,
 } from "@tactics-battle-game/core";
-import { Actor, PathfinderData, createPathfinderMap } from "@battles";
+import { Actor } from "@battles";
 import { ActionRange } from "./action-types";
 
 export const createLineRange = (horizontal = 1, vertical = 2): ActionRange => {
-  const getPathsInRange = (board: Board, actor: Actor): PathfinderData[] => {
-    const map = createPathfinderMap(board);
-    const paths: PathfinderData[] = [];
+  const getPathsInRange = (board: Board, actor: Actor): Tile[] => {
+    const tiles: Tile[] = [];
     const current: Vector2Tuple = [actor.position().x, actor.position().z];
 
     for (const direction of directions) {
@@ -72,12 +72,12 @@ export const createLineRange = (horizontal = 1, vertical = 2): ActionRange => {
         const tile = board.getTile(next);
         const actorTile = board.getTile(current);
         if (tile && Math.abs(tile.height() - actorTile.height()) <= vertical) {
-          paths.push(map[next[0]][next[1]]);
+          tiles.push(board.grid[next[0]][next[1]]);
         }
       }
     }
 
-    return paths;
+    return tiles;
   };
 
   return {

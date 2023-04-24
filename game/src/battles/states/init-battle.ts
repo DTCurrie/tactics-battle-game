@@ -8,6 +8,7 @@ import {
   Vector3,
 } from "three";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+import { uniqueNamesGenerator, Config, names } from "unique-names-generator";
 
 import {
   LevelData,
@@ -103,6 +104,10 @@ const factions: Factions = {
 
 const { scene, camera } = three();
 
+const nameConfig: Config = {
+  dictionaries: [names],
+};
+
 export const createInitBattleState = (
   selectorGltf: GLTF,
   levels: LevelData[]
@@ -130,7 +135,7 @@ export const createInitBattleState = (
       pointer.position.z = 0.25;
       pointer.rotation.setFromVector3(new Vector3(-5, 0, 0));
       const unit = createUnit({
-        name: job,
+        name: uniqueNamesGenerator(nameConfig),
         job: JOB_FACTORIES[job](),
       });
 

@@ -2,7 +2,17 @@ export const button = (label: string, handler: (e: Event) => void) => {
   const btn = document.createElement("button");
 
   btn.textContent = label;
-  btn.style.cssText = `width: 100px;`;
+  btn.classList.add(
+    ...[
+      "w-24",
+      "border-2",
+      "border-slate-700",
+      "bg-selected",
+      "opacity-80",
+      "hover:border-slate-900",
+      "hover:bg-selected-400",
+    ]
+  );
   btn.addEventListener("click", (e) => {
     e.preventDefault();
     handler(e);
@@ -13,17 +23,9 @@ export const button = (label: string, handler: (e: Event) => void) => {
 
 export const buttons = (btns: HTMLButtonElement[]) => {
   const btnContainer = document.createElement("div");
-
-  btnContainer.style.cssText = `
-    position: absolute;
-    left: 4px;
-    top: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    z-index: 100;
-  `;
-
+  btnContainer.classList.add(
+    ...["absolute", "top-1", "left-1", "flex", "flex-col", "gap-0.5", "z-50"]
+  );
   btnContainer.append(...btns);
 
   return btnContainer;

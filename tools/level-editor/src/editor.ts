@@ -1,10 +1,12 @@
 import { Color, Group, Vector2Tuple, Vector3Tuple } from "three";
 import {
+  BOARD_DEPTH,
+  BOARD_HEIGHT,
+  BOARD_WIDTH,
   Tile,
   createBoard,
   createTile,
   createTileMesh,
-  settings,
 } from "@tactics-battle-game/core";
 import { three } from "@tactics-battle-game/three-utils";
 

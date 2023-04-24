@@ -42,8 +42,6 @@ export const createBoard = (level: Level, selector: Group): Board => {
     if (obj instanceof Mesh) {
       obj.material = new MeshToonMaterial({
         color: markerColors.selected,
-        opacity: 0.75,
-        transparent: true,
       });
     }
   });

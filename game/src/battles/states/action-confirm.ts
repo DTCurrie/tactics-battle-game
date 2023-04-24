@@ -1,4 +1,4 @@
-import { MarkerColor } from "@tactics-battle-game/core";
+import { MarkerColor, Tile } from "@tactics-battle-game/core";
 import { Action } from "@actions/action-types";
 import { Actor, BattleState } from "@battles";
 import { createActionConfirmUi } from "./action-confirm-ui";
@@ -19,7 +19,7 @@ export const createActionConfirmState = (
         }
       }
 
-      return { ui: createActionConfirmUi(action, type) };
+      return { ui: createActionConfirmUi(action, type, actors) };
     },
     onExit: ({ targets, ui }) => {
       for (const target of targets) {

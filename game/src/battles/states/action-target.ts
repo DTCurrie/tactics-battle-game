@@ -12,10 +12,10 @@ export const createActionTargetState = (
       const targets: Tile[] = [];
       const actor = turn.actor();
 
-      const paths = action.range?.getPathsInRange(board, actor) ?? [];
-      for (const path of paths) {
-        path.tile.setMarked(type);
-        targets.push(path.tile);
+      const tiles = action.range?.getPathsInRange(board, actor) ?? [];
+      for (const path of tiles) {
+        path.setMarked(type);
+        targets.push(path);
       }
 
       return { targets, ui: createActionTargetUi(board, actor, action, type) };

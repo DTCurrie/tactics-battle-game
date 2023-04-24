@@ -1,14 +1,14 @@
-import { Board } from "@tactics-battle-game/core";
-import { Actor, PathfinderData } from "@battles";
+import { Board, Tile } from "@tactics-battle-game/core";
+import { Actor } from "@battles";
 import { Unit } from "@units";
 
 export type ActionArea = {
-  getTilesInArea: (board: Board, target: PathfinderData) => PathfinderData[];
+  getTilesInArea: (board: Board, target: Tile) => Tile[];
 };
 
 export type ActionEffect = {
-  predict: (target: PathfinderData) => number;
-  apply: (target: PathfinderData) => void;
+  predict: (target: Tile) => number;
+  apply: (target: Tile) => void;
 };
 
 export type ActionPower = {
@@ -21,7 +21,7 @@ export type ActionRange = Readonly<{
   directionOriented?: boolean;
   heightDeltaLimit?: number;
 }> & {
-  getPathsInRange: (board: Board, actor: Actor) => PathfinderData[];
+  getPathsInRange: (board: Board, actor: Actor) => Tile[];
 };
 
 export type ActionTarget = {
@@ -29,7 +29,7 @@ export type ActionTarget = {
 };
 
 export type ActionHitChance = {
-  calculate: (target: PathfinderData) => number;
+  calculate: (target: Tile) => number;
 };
 
 export type Action = Readonly<

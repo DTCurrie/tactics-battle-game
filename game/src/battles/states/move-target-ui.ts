@@ -56,10 +56,18 @@ export const createMoveTargetUi = (board: Board, pathfinder: Pathfinder) => {
 
     const intersects = raycaster.intersectObjects(board.group.children);
     if (intersects.length) {
-      board.moveSelector([
+      const coordinates: Vector2Tuple = [
         Math.floor(intersects[0].object.position.x),
         Math.floor(intersects[0].object.position.z),
-      ]);
+      ];
+
+      const tile = board.getTile(coordinates);
+
+      if (!tile || !tile.marked()) {
+        return;
+      }
+
+      board.moveSelector(coordinates);
     }
   };
 

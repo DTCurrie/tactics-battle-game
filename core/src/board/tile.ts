@@ -7,15 +7,16 @@ import {
   Vector3,
 } from "three";
 import { IGNORE_LAYER, STEP_HEIGHT, TILE_LAYER } from "../settings";
+import { colors } from "../colors";
 
 export type TileMesh = Mesh<BoxGeometry, MeshToonMaterial>;
 
 export type MarkerColor = "selected" | "movement" | "offense" | "support";
 export const markerColors: Record<MarkerColor, ColorRepresentation> = {
-  selected: "ghostwhite",
-  movement: "dodgerblue",
-  offense: "tomato",
-  support: "limegreen",
+  selected: colors.selected.DEFAULT,
+  movement: colors.movement.DEFAULT,
+  offense: colors.offense.DEFAULT,
+  support: colors.support.DEFAULT,
 };
 
 export const createTileGeometry = (height: number) =>
@@ -34,13 +35,13 @@ export type Tile = Readonly<{
 }> & {
   position: () => Vector2Tuple;
   height: () => number;
-  marked: () => boolean;
+  marked: () => MarkerColor | undefined;
   occupied: () => boolean;
   top: () => Vector3;
 
   setPosition: (next: Vector2Tuple) => Vector2Tuple;
   setHeight: (next: number) => number;
-  setMarked: (color?: MarkerColor) => boolean;
+  setMarked: (color?: MarkerColor) => MarkerColor | undefined;
   setOccupied: (next: boolean) => boolean;
 };
 
@@ -52,7 +53,7 @@ export const createTile = ({ mesh }: TileOptions): Tile => {
   let position: Vector2Tuple = [0, 0];
   let height = 0;
   let occupied = false;
-  let marked = false;
+  let marked: MarkerColor | undefined;
 
   const marker = new Mesh(
     new BoxGeometry(0.8, 0.1, 0.8),
@@ -81,16 +82,17 @@ export const createTile = ({ mesh }: TileOptions): Tile => {
     return next;
   };
 
-  const setMarked = (next?: MarkerColor): boolean => {
+  const setMarked = (next?: MarkerColor): MarkerColor | undefined => {
+    marked = next;
+
     if (next) {
       marker.visible = true;
       marker.material.color.set(markerColors[next]);
-      marked = true;
-      return true;
+      return next;
     }
 
     marker.visible = false;
-    return false;
+    return next;
   };
 
   const setOccupied = (next: boolean): boolean => {

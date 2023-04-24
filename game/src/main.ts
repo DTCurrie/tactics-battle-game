@@ -11,6 +11,8 @@ import { battleStateMachine } from "@battles";
 import { createInitBattleState } from "@battles/states/init-battle";
 import { logger } from "@lib/logger";
 
+import "./main.css";
+
 const { scene, camera, renderer, play } = three();
 const { addUpdate } = updatesSystem();
 const { logInfo, logError } = logger("main");

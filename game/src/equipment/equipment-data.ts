@@ -12,6 +12,7 @@ import {
   HEAD_SLOT,
   ACCESSORY_SLOT,
 } from "./equipment-types";
+import { createTileArea } from "@actions/unit-area";
 
 export const OFF_HAND_FACTORIES = {
   shield: () =>
@@ -32,8 +33,9 @@ export const WEAPON_FACTORIES = {
       type: ONE_HANDED,
       dualWield: true,
       attack: {
-        range: createLineRange(),
+        area: createTileArea(),
         power: createWeaponPower(),
+        range: createLineRange(),
         target: createWeaponTarget(),
       },
       stats: {
@@ -47,8 +49,9 @@ export const WEAPON_FACTORIES = {
       slot: MAIN_HAND_SLOT,
       type: ONE_HANDED,
       attack: {
-        range: createLineRange(),
+        area: createTileArea(),
         power: createWeaponPower(),
+        range: createLineRange(),
         target: createWeaponTarget(),
       },
       stats: {
@@ -62,8 +65,9 @@ export const WEAPON_FACTORIES = {
       slot: MAIN_HAND_SLOT,
       type: TWO_HANDED,
       attack: {
-        range: createAreaRange(2),
+        area: createTileArea(),
         power: createWeaponPower(),
+        range: createAreaRange(2),
         target: createWeaponTarget(),
       },
       stats: {

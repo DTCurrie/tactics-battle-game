@@ -35,7 +35,7 @@ export type WeaponSlot = (typeof WEAPON_SLOTS)[number];
 export type WeaponType = (typeof WEAPON_TYPES)[number];
 
 export type WeaponAttackAction = Required<
-  Pick<Action, "power" | "range" | "target">
+  Pick<Action, "area" | "power" | "range" | "target">
 >;
 
 export type WeaponProperties = {
