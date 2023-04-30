@@ -1,53 +1,50 @@
 import { logger } from "./logger";
 
-export type Sender = string;
-export type ListenerData = Record<string, unknown>;
-export type Listener = (sender: Sender, data?: ListenerData) => void;
-export type Observer = Listener[];
-export type Observers = Record<Sender, Observer>;
-export type MessageType = string;
-export type ObserversTable = Record<MessageType, Observers>;
+export type MessageHandler = <Sender = object, Data = unknown>(
+  sender: Sender,
+  data: Data
+) => void;
 
-const defaultSender = "default" as const;
+export class SenderTable extends Map<object, MessageHandler[]> {
+  constructor() {
+    super();
+  }
+}
+
+const { logError, logWarning } = logger("messenger");
+const defaultSender = { default: true };
 
 export type Messenger = Readonly<{
-  table: ObserversTable;
+  _senderTables: Map<string, SenderTable>;
 }> & {
   addObserver: (
-    messageType: MessageType,
-    handler: Listener,
-    sender?: Sender
+    message: string,
+    handler: MessageHandler,
+    sender?: object
   ) => void;
 
   removeObserver: (
-    messageType: MessageType,
-    handler: Listener,
-    sender?: Sender
-  ) => void;
-
-  message: (
-    messageType: MessageType,
-    sender?: Sender,
-    data?: ListenerData
+    message: string,
+    handler: MessageHandler,
+    sender?: object
   ) => void;
 
   clean: () => void;
+  emit: (message: string, sender?: object, data?: unknown) => void;
 };
 
-const createMessenger = (): Messenger => {
-  const table: ObserversTable = {};
-  const invoking = new Set<Listener[]>();
-
-  const { logError, logWarning } = logger("messenger");
+export const createMessenger = (): Messenger => {
+  const senderTables = new Map<string, SenderTable>();
+  const invoking = new Set<MessageHandler[]>();
 
   const addObserver = (
-    messageType: MessageType,
-    handler: Listener,
-    sender: Sender = defaultSender
+    message: string,
+    handler: MessageHandler,
+    sender?: object
   ) => {
-    if (!messageType) {
+    if (!message) {
       logError("Can't observe a message with no type", {
-        messageType,
+        message,
         handler,
         sender,
       });
@@ -55,26 +52,61 @@ const createMessenger = (): Messenger => {
       return;
     }
 
-    const observers = (table[messageType] ??= {});
-    const observer = (observers[sender] ??= []);
+    if (!senderTables.has(message)) {
+      senderTables.set(message, new SenderTable());
+    }
 
-    if (!observer.includes(handler)) {
-      if (invoking.has(observer)) {
-        observers[sender] = [...observer];
+    const table = senderTables.get(message);
+    if (!table) {
+      logError("Error getting sender table", {
+        message,
+        handler,
+        sender,
+        senderTables,
+        table,
+      });
+
+      return;
+    }
+
+    const key = sender ?? defaultSender;
+    if (!table.has(key)) {
+      table.set(key, []);
+    }
+
+    const list = table.get(key);
+    if (!list) {
+      logError("Error getting sender list", {
+        message,
+        handler,
+        sender,
+        table,
+        key,
+        list,
+      });
+
+      return;
+    }
+
+    if (!list.includes(handler)) {
+      if (invoking.has(list)) {
+        const next = [...list];
+        table.set(key, next);
       }
 
-      observers[sender] = [...observer, handler];
+      list.push(handler);
+      table.set(key, list);
     }
   };
 
   const removeObserver = (
-    messageType: MessageType,
-    handler: Listener,
-    sender: Sender = defaultSender
+    message: string,
+    handler: MessageHandler,
+    sender?: object
   ) => {
-    if (!messageType) {
+    if (!message) {
       logError("Can't stop observing a message with no type", {
-        messageType,
+        message,
         handler,
         sender,
       });
@@ -82,32 +114,61 @@ const createMessenger = (): Messenger => {
       return;
     }
 
-    if (!table[messageType]) {
+    if (!senderTables.has(message)) {
       return;
     }
 
-    const observers = table[messageType];
-    if (!observers[sender]) {
+    const table = senderTables.get(message);
+    const key = sender ?? defaultSender;
+
+    if (!table?.has(key)) {
       return;
     }
 
-    const observer = observers[sender];
-    const index = observer?.indexOf(handler);
-
+    const list = table.get(key) ?? [];
+    const index = list.indexOf(handler);
     if (index >= 0) {
-      observer.splice(index, 1);
-      observers[sender] = [...observer];
+      if (invoking.has(list)) {
+        const next = [...list];
+        table.set(key, next);
+      }
+
+      list.splice(index, 1);
+      table.set(key, list);
     }
   };
 
-  const message = (
-    messageType: MessageType,
-    sender: Sender = defaultSender,
-    data?: ListenerData
-  ) => {
-    if (!messageType) {
+  const clean = () => {
+    const not = [...senderTables.keys()];
+
+    for (const message of not) {
+      const table = senderTables.get(message);
+      if (!table) {
+        continue;
+      }
+
+      const keys = table.keys();
+      for (const sender of keys) {
+        const list = table.get(sender);
+        if (!list) {
+          continue;
+        }
+
+        if (list.length === 0) {
+          table.delete(sender);
+        }
+      }
+
+      if (table.size === 0) {
+        senderTables.delete(message);
+      }
+    }
+  };
+
+  const emit = (message: string, sender?: object, data?: unknown) => {
+    if (!message) {
       logError("Can't post a message with no type", {
-        messageType,
+        message,
         sender,
         data,
       });
@@ -115,11 +176,11 @@ const createMessenger = (): Messenger => {
       return;
     }
 
-    if (!table[messageType]) {
+    if (!senderTables.has(message)) {
       logWarning(
-        "Message type is not being observed",
+        "Message is not being observed",
         {
-          messageType,
+          message,
           sender,
           data,
         },
@@ -129,40 +190,38 @@ const createMessenger = (): Messenger => {
       return;
     }
 
-    const observers = table[messageType];
+    const table = senderTables.get(message);
+    if (!table) {
+      logWarning("Message is not being observed", {
+        message,
+        sender,
+        senderTables,
+        table,
+      });
 
-    if (observers[sender]) {
-      const observer = observers[sender];
-      invoking.add(observer);
-
-      for (const listener of observer) {
-        listener(sender, data);
-      }
-
-      invoking.delete(observer);
+      return;
     }
-  };
 
-  const clean = () => {
-    for (const messageType in table) {
-      for (const sender in table[messageType]) {
-        if (table[messageType][sender].length === 0) {
-          delete table[messageType][sender];
-        }
+    const key = sender ?? defaultSender;
+    const list = table.get(key) ?? [];
+
+    if (list.length > 0) {
+      invoking.add(list);
+
+      for (const handler of list) {
+        handler(sender, data);
       }
 
-      if (Object.keys(table[messageType]).length === 0) {
-        delete table[messageType];
-      }
+      invoking.delete(list);
     }
   };
 
   return {
-    table,
+    _senderTables: senderTables,
     addObserver,
     removeObserver,
-    message,
     clean,
+    emit,
   };
 };
 

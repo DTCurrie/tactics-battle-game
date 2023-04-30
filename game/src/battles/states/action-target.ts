@@ -18,7 +18,10 @@ export const createActionTargetState = (
         targets.push(path);
       }
 
-      return { targets, ui: createActionTargetUi(board, actor, action, type) };
+      return {
+        targets,
+        ui: createActionTargetUi(board, actor, action, type),
+      };
     },
     onExit: ({ ui, targets }) => {
       for (const target of targets) {
@@ -26,7 +29,7 @@ export const createActionTargetState = (
       }
 
       ui.dispose();
-      return { ui: undefined };
+      return { ui: undefined, targets: [] };
     },
   };
 };

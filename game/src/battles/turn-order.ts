@@ -3,11 +3,18 @@ import { action, atom } from "nanostores";
 import { Board, Direction } from "@tactics-battle-game/core";
 import { TURN_COUNTER } from "@units/stats";
 import { Actor } from "./actor";
+import { messenger } from "@lib/messenger";
 
-const activationCost = 100;
-const turnCost = 50;
-const moveCost = 30;
-const actionCost = 20;
+const ACTIVATION_COST = 100 as const;
+const TURN_COST = 50 as const;
+const MOVE_COST = 30 as const;
+const ACTION_COST = 20 as const;
+
+const BEFORE_ROUND = "beforeRound" as const;
+const TURN_CHECKED = "turnChecked" as const;
+const BEFORE_TURN = "beforeTurn" as const;
+const TURN_COMPLETED = "turnCompleted" as const;
+const ROUND_COMPLETED = "roundCompleted" as const;
 
 export type Turn = {
   actor: () => Actor;
@@ -96,15 +103,17 @@ export const createTurn = (board: Board, first: Actor): Turn => {
 };
 
 export type TurnOrder = {
-  round: (actors: Actor[], data: Turn) => Generator<Actor, void, unknown>;
+  round: (actors: Actor[], turn: Turn) => Generator<Actor, void, unknown>;
 };
+
+const { emit } = messenger();
 
 export const createTurnOrder = () => {
   const canTakeTurn = ({ getStat }: Actor) => {
-    return getStat(TURN_COUNTER) >= activationCost;
+    return getStat(TURN_COUNTER) >= ACTIVATION_COST;
   };
 
-  function* round(actors: Actor[], data: Turn) {
+  function* round(actors: Actor[], turn: Turn) {
     for (;;) {
       for (const { incrementCtr } of actors) {
         incrementCtr();
@@ -118,17 +127,17 @@ export const createTurnOrder = () => {
 
       for (const unit of sortedUnits) {
         if (canTakeTurn(unit)) {
-          data.setActor(unit);
+          turn.setActor(unit);
           yield unit;
 
-          let cost = 0 + turnCost;
+          let cost = 0 + TURN_COST;
 
-          if (data.moved()) {
-            cost += moveCost;
+          if (turn.moved()) {
+            cost += MOVE_COST;
           }
 
-          if (data.acted()) {
-            cost += actionCost;
+          if (turn.acted()) {
+            cost += ACTION_COST;
           }
 
           unit.reduceCtr(cost);

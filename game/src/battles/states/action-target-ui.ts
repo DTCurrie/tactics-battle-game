@@ -70,7 +70,22 @@ export const createActionTargetUi = (
     const heading = getHeading(actor.coordinates(), tile.position());
     actor.setDirection(heading);
 
-    battleStateMachine().transition(createActionConfirmState(action, type));
+    const candidates: Tile[] = [];
+
+    for (const color in currentCandidates) {
+      const marker = color as MarkerColor;
+      const tiles = currentCandidates[marker];
+
+      for (const tile of tiles) {
+        candidates.push(tile);
+      }
+
+      currentCandidates[marker] = [];
+    }
+
+    battleStateMachine().transition(
+      createActionConfirmState(action, type, candidates)
+    );
   }
 
   const raycast = () => {

@@ -5,13 +5,14 @@ import { createActionConfirmUi } from "./action-confirm-ui";
 
 export const createActionConfirmState = (
   action: Action,
-  type: Extract<MarkerColor, "offense" | "support">
+  type: Extract<MarkerColor, "offense" | "support">,
+  candidates: Tile[]
 ): BattleState => {
   return {
-    onEnter: ({ targets, getActorAtPosition }) => {
+    onEnter: ({ getActorAtPosition }) => {
       const actors: Actor[] = [];
 
-      for (const target of targets) {
+      for (const target of candidates) {
         const actor = getActorAtPosition(target.position());
         if (actor && action?.target?.isTarget(actor)) {
           target.setMarked(type);
@@ -21,8 +22,8 @@ export const createActionConfirmState = (
 
       return { ui: createActionConfirmUi(action, type, actors) };
     },
-    onExit: ({ targets, ui }) => {
-      for (const target of targets) {
+    onExit: ({ ui }) => {
+      for (const target of candidates) {
         target.setMarked();
       }
 
